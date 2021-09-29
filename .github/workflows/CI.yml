@@ -51,11 +51,8 @@ jobs:
       - run: |
           julia --project=docs -e '
             using Pkg
-            Pkg.add(url = "https://github.com/igutierrezm/PolyaGammaSamplers.jl")'
-      - run: |
-          julia --project=docs -e '
-            using Pkg
-            Pkg.add(url = "https://github.com/igutierrezm/BayesNegativeBinomial.jl")'                      
+            Pkg.add(url = "https://github.com/igutierrezm/PolyaGammaSamplers.jl")
+            Pkg.add(url = "https://github.com/igutierrezm/BayesNegativeBinomial.jl")'
       - run: |
           julia --project=docs -e '
             using Pkg

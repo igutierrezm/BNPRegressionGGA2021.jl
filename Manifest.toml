@@ -9,14 +9,6 @@ uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
-[[BayesNegativeBinomial]]
-deps = ["Distributions", "ExtractMacro", "LinearAlgebra", "PolyaGammaSamplers", "Random"]
-git-tree-sha1 = "924734abe05a3c2a733e7b96c251c54dd26ad3be"
-repo-rev = "master"
-repo-url = "https://github.com/igutierrezm/BayesNegativeBinomial.jl"
-uuid = "bfffd7ee-3ae3-4322-8549-de099c477cdc"
-version = "0.1.0"
-
 [[Calculus]]
 deps = ["LinearAlgebra"]
 git-tree-sha1 = "f641eb0a4f00c343bbc32346e1217b86f3ce9dad"

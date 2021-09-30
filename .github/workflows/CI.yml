@@ -40,31 +40,31 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: lcov.info
-  # docs:
-  #   name: Documentation
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - uses: julia-actions/setup-julia@v1
-  #       with:
-  #         version: '1'
-  #     - run: |
-  #         julia --project=docs -e '
-  #           using Pkg
-  #           Pkg.add(url = "https://github.com/igutierrezm/BayesNegativeBinomial.jl")'
-  #     - run: |
-  #         julia --project=docs -e '
-  #           using Pkg
-  #           Pkg.develop(PackageSpec(path=pwd()))
-  #           Pkg.instantiate()'
-  #     - run: |
-  #         julia --project=docs -e '
-  #           using Documenter: DocMeta, doctest
-  #           using BNPRegressionGGA2021
-  #           DocMeta.setdocmeta!(BNPRegressionGGA2021, :DocTestSetup, :(using BNPRegressionGGA2021); recursive=true)
-  #           doctest(BNPRegressionGGA2021)'
-  #     - run: julia --project=docs docs/make.jl
-  #       env:
-  #         JULIA_PKG_SERVER: ""
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #         DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
+  docs:
+    name: Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: julia-actions/setup-julia@v1
+        with:
+          version: '1'
+      - run: |
+          julia --project=docs -e '
+            using Pkg
+            Pkg.add(url = "https://github.com/igutierrezm/BayesNegativeBinomial.jl")'
+      - run: |
+          julia --project=docs -e '
+            using Pkg
+            Pkg.develop(PackageSpec(path=pwd()))
+            Pkg.instantiate()'
+      - run: |
+          julia --project=docs -e '
+            using Documenter: DocMeta, doctest
+            using BNPRegressionGGA2021
+            DocMeta.setdocmeta!(BNPRegressionGGA2021, :DocTestSetup, :(using BNPRegressionGGA2021); recursive=true)
+            doctest(BNPRegressionGGA2021)'
+      - run: julia --project=docs docs/make.jl
+        env:
+          JULIA_PKG_SERVER: ""
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}

@@ -8,11 +8,11 @@ using Test
     y0 = randn(rng, N)
     X0 = randn(rng, N, D)
     y1 = LinRange(-3, 3, N0) |> collect
-    X1 = zeros(N0, D)
+    X1 = zeros(1, D)
     data = BNPRegressionGGA2021.Data(y0, X0, y1, X1)
     pa = BNPRegressionGGA2021.Parameters(; N, D)
     hp = BNPRegressionGGA2021.HyperParameters(; D)
-    gq = BNPRegressionGGA2021.GeneratedQuantities(N = N0)
+    gq = BNPRegressionGGA2021.GeneratedQuantities(Ny = N0, Nx = size(X1, 1))
     smpl = BNPRegressionGGA2021.Sampler(y0, X0, y1, X1)
     BNPRegressionGGA2021.update_suffstats!(smpl)
     BNPRegressionGGA2021.update_χ!(rng, smpl)

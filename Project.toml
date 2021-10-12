@@ -4,6 +4,7 @@ authors = ["Iván Gutiérrez <ivangutierrez1988@gmail.com> and contributors"]
 version = "0.1.0"
 
 [deps]
+BSplines = "488c2830-172b-11e9-1591-253b8a7df96d"
 BayesNegativeBinomial = "bfffd7ee-3ae3-4322-8549-de099c477cdc"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 ExtractMacro = "f86d3d12-fd5b-522c-99e9-61577282a1e9"

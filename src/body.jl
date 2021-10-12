@@ -22,7 +22,7 @@ Base.@kwdef struct Parameters
     D::Int
     r::Vector{Int} = ones(Int, N)
     d::Vector{Int} = ones(Int, N)
-    β::Vector{Float64} = zeros(D)
+    β::Vector{Float64} = ones(D)
     μ::Vector{Float64} = zeros(N)
     τ::Vector{Float64} = ones(N)
     θ::Vector{Float64} = ones(N) * 0.5
@@ -151,7 +151,10 @@ function update_β!(rng::AbstractRNG, smpl::Sampler)
     @extract smpl : pa βsmpl
     @extract pa : r β
     @. βsmpl.y = r - 1
-    BayesNegativeBinomial.step!(rng, βsmpl)
+    BayesNegativeBinomial.step_w!(rng, βsmpl)
+    BayesNegativeBinomial.step_A!(βsmpl)
+    BayesNegativeBinomial.step_b!(βsmpl)    
+    BayesNegativeBinomial.step_β!(rng, βsmpl)    
     β .= βsmpl.β
 end
 

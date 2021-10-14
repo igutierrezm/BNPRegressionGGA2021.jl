@@ -149,8 +149,8 @@ function update_f!(smpl::Sampler)
     @extract smpl.gq : f
     for i in 1:length(f)
         f[i] = 0.0
+        θ0 = 1 / (1 + exp(X1[i, :] ⋅ β))
         for j in 1:m(smpl)
-            θ0 = 1 / (1 + exp(X1[i, :] ⋅ β))
             wj = (1 - θ0) * θ0^(j - 1)
             f[i] += wj * κ(smpl, y1[i], j)
         end

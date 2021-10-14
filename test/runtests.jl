@@ -11,7 +11,7 @@ using Test
     X1 = zeros(N1, D)
     data = BNPRegressionGGA2021.Data(; y0, X0, y1, X1)
     pa = BNPRegressionGGA2021.Parameters(; N, D)
-    tp = BNPRegressionGGA2021.TransformedParameters(; N, D)
+    tp = BNPRegressionGGA2021.TransformedParameters(; N)
     gq = BNPRegressionGGA2021.GeneratedQuantities(N = N1)
     smpl = BNPRegressionGGA2021.Sampler(data)
     BNPRegressionGGA2021.update_suffstats!(smpl)

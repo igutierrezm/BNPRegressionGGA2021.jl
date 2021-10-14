@@ -15,23 +15,22 @@ using LinearAlgebra
 #=================================#
 
 function simulate_sample_01(rng, N0)
-    N1 = 50
-    dy = MixtureModel(Normal, [(-2.0, 0.5), (2.0, 0.5)], [0.5, 0.5])
-    X0 = ones(N0, 1)
-    X1 = ones(N1, 1)
-    y0 = rand(rng, dy, N0)
-    y1 = LinRange(minimum(y0), maximum(y0), N1) |> collect |> x -> repeat(x, 2)
-    return y0, X0, y1, X1
+    y0 = rand(rng, MixtureModel(Normal, [(-2.0, 0.5), (2.0, 0.5)], [0.5, 0.5]), N0)
+    y1 = LinRange(minimum(y0), maximum(y0), 50) |> collect |> x -> repeat(x, 2)
+    return y0, y1
 end
 
-N = 500
+N = 1000
 rng = MersenneTwister(1)
-simulate_sample_01(rng, N)
-data = BNPRegressionGGA2021.Data(; y0, X0, y1, X1);
+y0, y1 = simulate_sample_01(rng, N)
+data = BNPRegressionGGA2021.Data(; y0, y1);
 smpl = BNPRegressionGGA2021.Sampler(data);
-chain = BNPRegressionGGA2021.sample(rng, smpl; mcmcsize = 4000, burnin = 2000);
+chain = BNPRegressionGGA2021.sample(rng, smpl; mcmcsize = 10000, burnin = 5000);
 
-
+fh = mean(chain);
+plot(x = y0, Geom.histogram)
+plot(x = y0, Geom.density)
+plot(x = y1, y = fh, Geom.line)
 
 # # Simulate a sample 
 # function simulate_sample(rng, N)

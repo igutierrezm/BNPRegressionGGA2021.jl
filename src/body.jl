@@ -1,13 +1,9 @@
 Base.@kwdef struct Data
     # Sample
     y0::Vector{Float64}
-    X0::Matrix{Float64}
     # Grid points
     y1::Vector{Float64}
-    X1::Matrix{Float64}
     # HyperParameters
-    m0β::Vector{Float64} = zeros(size(X0, 1))
-    Σ0β::Matrix{Float64} = 3 * I(size(X0, 1))
     m0μ::Float64 = 0.0
     c0μ::Float64 = 2.0
     a0τ::Float64 = 1.0
@@ -19,18 +15,15 @@ end
 
 Base.@kwdef struct Parameters
     N::Int
-    D::Int
     r::Vector{Int} = ones(Int, N)
     d::Vector{Int} = ones(Int, N)
-    β::Vector{Float64} = zeros(D)
     μ::Vector{Float64} = zeros(N)
     τ::Vector{Float64} = ones(N)
-    θ::Vector{Float64} = ones(N) * 0.5
+    θ::Vector{Float64} = [0.5]
 end
 
 Base.@kwdef struct TransformedParameters
     N::Int
-    D::Int
     n::Vector{Int} = zeros(Int, N)
     ȳ::Vector{Float64} = zeros(N)
     s::Vector{Float64} = zeros(N)
@@ -46,14 +39,12 @@ struct Sampler
     pa::Parameters
     tp::TransformedParameters
     gq::GeneratedQuantities
-    βsmpl::BayesNegativeBinomial.Sampler
     function Sampler(data::Data)
-        N0, D = size(data.X0)
-        pa = Parameters(N = N0, D = D)
-        tp = TransformedParameters(N = N0, D = D)
+        N0 = length(data.y0)
+        pa = Parameters(N = N0)
+        tp = TransformedParameters(N = N0)
         gq = GeneratedQuantities(N = length(data.y1))
-        βsmpl = BayesNegativeBinomial.Sampler(ones(Int, N0), data.X0)
-        new(data, pa, tp, gq, βsmpl)
+        new(data, pa, tp, gq)
     end
 end
 
@@ -100,7 +91,7 @@ function update_r!(rng::AbstractRNG, smpl::Sampler)
     for i in 1:length(r)
         zi = rand(rng, Beta(r[i] - d[i] + 1, d[i]))
         vi = rand(rng, Gamma(r[i] + s0r - 1, 1))
-        r[i] = rand(rng, Poisson(θ[i] * zi * vi)) + d[i]
+        r[i] = rand(rng, Poisson((1 - θ[1]) * zi * vi)) + d[i]
     end
 end
 
@@ -108,30 +99,8 @@ function update_θ!(rng::AbstractRNG, smpl::Sampler)
     @extract smpl.pa : r θ
     @extract smpl.data : a0θ b0θ s0r
     N = length(r)
-    θ0 = rand(rng, Beta(sum(r) + a0θ, s0r * N + b0θ - N))
-    θ .= θ0
-
-    # @extract smpl.data : X0
-    # @extract smpl.pa : θ β
-    # mul!(θ, X0, β)
-    # @. θ = 1 / (1 + exp(θ))
+    θ[1] = rand(rng, Beta(s0r * N + a0θ, sum(r) - N + b0θ))
 end
-
-# function update_w!(smpl::Sampler)
-#     @extract smpl.data : X1 s0r
-#     @extract smpl.pa : θ
-#     @extract smpl.gq : w
-#     for ix in 1:size(X1, 1), j in 1:m(smpl)
-#         # logwj = 
-#         #     - log(j) +
-#         #     logabsbinomial(j + sr0 - 2, j - 1)[1] +
-#         #     sr0 * log(θ[]) +
-#         #     (j - 1) * log(1 - θ[]) +
-#         #     log(_₂F₁(j + sr0 - 1, 1, j + 1, 1 - θ[]))
-#         # w[j] = exp(logwj)
-#         w[ix][j] = θ[ix] * (1 - θ[ix])^(j - 1)
-#     end
-# end
 
 function update_d!(rng::AbstractRNG, smpl::Sampler)
     @extract smpl.pa : r d
@@ -148,24 +117,12 @@ function update_d!(rng::AbstractRNG, smpl::Sampler)
     return nothing
 end
 
-# function update_β!(rng::AbstractRNG, smpl::Sampler)
-#     @extract smpl : pa βsmpl
-#     @extract pa : r β
-#     @. βsmpl.y = r - 1
-#     BayesNegativeBinomial.step_w!(rng, βsmpl)
-#     BayesNegativeBinomial.step_A!(βsmpl)
-#     BayesNegativeBinomial.step_b!(βsmpl)    
-#     BayesNegativeBinomial.step_β!(rng, βsmpl)    
-#     β .= βsmpl.β
-# end
-
 function update_f!(smpl::Sampler)
-    @extract smpl.data : y1 X1
-    @extract smpl.pa : β θ
+    @extract smpl.data : y1
+    @extract smpl.pa : θ
     @extract smpl.gq : f
     for i in 1:length(f)
         f[i] = 0.0
-        # θ0 = 1 / (1 + exp(- X1[i, :] ⋅ β))
         for j in 1:m(smpl)
             wj = θ[1] * (1 - θ[1])^(j - 1)
             f[i] += wj * κ(smpl, y1[i], j)
@@ -187,7 +144,6 @@ function step!(rng::AbstractRNG, mdl::Sampler)
     update_f!(mdl)
     update_r!(rng, mdl)
     update_θ!(rng, mdl)
-    # update_β!(rng, mdl)
 end
 
 function sample(rng::AbstractRNG, s::Sampler; mcmcsize = 10000, burnin = 5000)

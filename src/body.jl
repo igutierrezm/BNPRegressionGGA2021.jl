@@ -22,7 +22,7 @@ Base.@kwdef struct Parameters
     D::Int
     r::Vector{Int} = ones(Int, N)
     d::Vector{Int} = ones(Int, N)
-    β::Vector{Float64} = ones(D)
+    β::Vector{Float64} = zeros(D)
     μ::Vector{Float64} = zeros(N)
     τ::Vector{Float64} = ones(N)
     θ::Vector{Float64} = ones(N) * 0.5
@@ -100,20 +100,21 @@ function update_r!(rng::AbstractRNG, smpl::Sampler)
     for i in 1:length(r)
         zi = rand(rng, Beta(r[i] - d[i] + 1, d[i]))
         vi = rand(rng, Gamma(r[i] + s0r - 1, 1))
-        r[i] = rand(rng, Poisson((1 - θ[i]) * zi * vi)) + d[i]
+        r[i] = rand(rng, Poisson(θ[i] * zi * vi)) + d[i]
     end
 end
 
 function update_θ!(rng::AbstractRNG, smpl::Sampler)
-    # @extract smpl.pa : r θ
-    # @extract smpl.data : a0θ b0θ s0r
-    # N = length(r)
-    # θ0 = rand(rng, Beta(s0r * N + a0θ, sum(r) + b0θ - N))
-    # θ .= θ0
-    @extract smpl.data : X0
-    @extract smpl.pa : θ β
-    mul!(θ, X0, β)
-    @. θ = 1 / (1 + exp(- θ))
+    @extract smpl.pa : r θ
+    @extract smpl.data : a0θ b0θ s0r
+    N = length(r)
+    θ0 = rand(rng, Beta(sum(r) + a0θ, s0r * N + b0θ - N))
+    θ .= θ0
+
+    # @extract smpl.data : X0
+    # @extract smpl.pa : θ β
+    # mul!(θ, X0, β)
+    # @. θ = 1 / (1 + exp(θ))
 end
 
 # function update_w!(smpl::Sampler)
@@ -147,26 +148,26 @@ function update_d!(rng::AbstractRNG, smpl::Sampler)
     return nothing
 end
 
-function update_β!(rng::AbstractRNG, smpl::Sampler)
-    @extract smpl : pa βsmpl
-    @extract pa : r β
-    @. βsmpl.y = r - 1
-    BayesNegativeBinomial.step_w!(rng, βsmpl)
-    BayesNegativeBinomial.step_A!(βsmpl)
-    BayesNegativeBinomial.step_b!(βsmpl)    
-    BayesNegativeBinomial.step_β!(rng, βsmpl)    
-    β .= βsmpl.β
-end
+# function update_β!(rng::AbstractRNG, smpl::Sampler)
+#     @extract smpl : pa βsmpl
+#     @extract pa : r β
+#     @. βsmpl.y = r - 1
+#     BayesNegativeBinomial.step_w!(rng, βsmpl)
+#     BayesNegativeBinomial.step_A!(βsmpl)
+#     BayesNegativeBinomial.step_b!(βsmpl)    
+#     BayesNegativeBinomial.step_β!(rng, βsmpl)    
+#     β .= βsmpl.β
+# end
 
 function update_f!(smpl::Sampler)
     @extract smpl.data : y1 X1
+    @extract smpl.pa : β θ
     @extract smpl.gq : f
-    @extract smpl.pa : β
     for i in 1:length(f)
         f[i] = 0.0
-        θ0 = 1 / (1 + exp(- X1[i, :] ⋅ β))
+        # θ0 = 1 / (1 + exp(- X1[i, :] ⋅ β))
         for j in 1:m(smpl)
-            wj = θ0 * (1 - θ0)^(j - 1)
+            wj = θ[1] * (1 - θ[1])^(j - 1)
             f[i] += wj * κ(smpl, y1[i], j)
         end
     end
@@ -186,7 +187,7 @@ function step!(rng::AbstractRNG, mdl::Sampler)
     update_f!(mdl)
     update_r!(rng, mdl)
     update_θ!(rng, mdl)
-    update_β!(rng, mdl)
+    # update_β!(rng, mdl)
 end
 
 function sample(rng::AbstractRNG, s::Sampler; mcmcsize = 10000, burnin = 5000)

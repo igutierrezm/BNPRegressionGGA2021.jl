@@ -14,7 +14,7 @@ Base.@kwdef struct Data
     b0τ::Float64 = 1.0
     a0θ::Float64 = 1.0
     b0θ::Float64 = 1.0
-    s0r::Int = 2
+    s0r::Int = 5
 end
 
 Base.@kwdef struct Parameters
@@ -53,7 +53,7 @@ struct Sampler
         pa = Parameters(; N0, D0)
         gq = GeneratedQuantities(; N1)
         tp = TransformedParameters(; N0, D0)
-        βsmpl = BayesNegativeBinomial.Sampler(ones(Int, N0), data.X0)
+        βsmpl = BayesNegativeBinomial.Sampler(ones(Int, N0), data.X0; r0y = [data.s0r])
         new(data, pa, tp, gq, βsmpl)
     end
 end
@@ -133,6 +133,16 @@ function update_θ!(rng::AbstractRNG, smpl::Sampler)
     @. θ = 1 / (1 + exp(θ))
 end
 
+function get_w(θ0, s0r, j)
+    exp(
+        - log(j) +
+        logabsbinomial(j + s0r - 2, j - 1)[1] +
+        s0r * log(θ0) +
+        (j - 1) * log(1 - θ0) +
+        log(_₂F₁(j + s0r - 1, 1, j + 1, 1 - θ0))
+    )
+end
+
 # # function update_w!(smpl::Sampler)
 # #     @extract smpl.data : X1 s0r
 # #     @extract smpl.pa : θ
@@ -162,7 +172,7 @@ function update_β!(rng::AbstractRNG, smpl::Sampler)
 end
 
 function update_f!(smpl::Sampler)
-    @extract smpl.data : y1 X1
+    @extract smpl.data : y1 X1 s0r
     @extract smpl.pa : β θ
     @extract smpl.gq : f
     for i in 1:length(f)
@@ -170,7 +180,8 @@ function update_f!(smpl::Sampler)
         θ0 = 1 / (1 + exp(X1[i, :] ⋅ β))
         # θ0 = θ[1] * (1 - θ[1])^(j - 1)
         for j in 1:m(smpl)
-            wj = θ0 * (1 - θ0)^(j - 1)
+            # wj = θ0 * (1 - θ0)^(j - 1)
+            wj = get_w(θ0, s0r, j)
             f[i] += wj * κ(smpl, y1[i], j)
         end
     end
@@ -194,12 +205,14 @@ function step!(rng::AbstractRNG, mdl::Sampler)
 end
 
 function sample(rng::AbstractRNG, s::Sampler; mcmcsize = 4000, burnin = 2000)
-    chain = [zeros(length(s.gq.f)) for _ in 1:(mcmcsize - burnin)]
+    chainf = [zeros(length(s.gq.f)) for _ in 1:(mcmcsize - burnin)]
+    chainβ = [zeros(length(s.pa.β)) for _ in 1:(mcmcsize - burnin)]
     for iter in 1:mcmcsize
         step!(rng, s)
         if iter > burnin
-            chain[iter - burnin] .= s.gq.f
+            chainf[iter - burnin] .= s.gq.f
+            chainβ[iter - burnin] .= s.pa.β
         end
     end
-    return chain
+    return chainf, chainβ
 end

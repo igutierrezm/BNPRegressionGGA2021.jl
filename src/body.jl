@@ -18,7 +18,6 @@ Base.@kwdef struct Sampler
     b0τ::Float64 = 1.0
     a0θ::Float64 = 1.0
     b0θ::Float64 = 1.0
-    s0r::Int = 2
     # (Private) Parameters
     ϕ::Vector{Float64} = ones(N0) / 2
     τ::Vector{Float64} = ones(N0)
@@ -29,8 +28,10 @@ Base.@kwdef struct Sampler
     r::Vector{Int} = ones(Int, N0)
     d::Vector{Int} = ones(Int, N0)
     f::Vector{Float64} = zeros(N1)
-    βsmpl::BayesNegativeBinomial.Sampler = 
-        BayesNegativeBinomial.Sampler(ones(Int, N0), X0; r0y = [s0r])
+    rmodel::BayesNegativeBinomial.Sampler = 
+        BayesNegativeBinomial.Sampler(ones(Int, N0), X0)
+    β::Vector{Float64} = rmodel.β
+    s::Vector{Int} = rmodel.s
 end
 
 function m(sampler::Sampler)
@@ -90,43 +91,43 @@ function update_d!(rng::AbstractRNG, sampler::Sampler)
 end
 
 function update_ϕ!(sampler::Sampler)
-    (; X0, βsmpl, ϕ) = sampler
-    mul!(ϕ, X0, βsmpl.β)
+    (; X0, β, ϕ) = sampler
+    mul!(ϕ, X0, β)
     @. ϕ = 1.0 / (1.0 + exp(ϕ))
 end
 
 function update_r!(rng::AbstractRNG, sampler::Sampler)
-    (; N0, d, r, ϕ, s0r) = sampler
+    (; N0, d, r, ϕ, s) = sampler
     for i in 1:N0
         zi = rand(rng, Beta(r[i] - d[i] + 1, d[i]))
-        vi = rand(rng, Gamma(r[i] + s0r - 1, 1))
+        vi = rand(rng, Gamma(r[i] + s[] - 1, 1))
         r[i] = rand(rng, Poisson((1 - ϕ[i]) * zi * vi)) + d[i]
     end
 end
 
-function get_w(θ0, s0r, j)
+function get_w(θ0, s0, j)
     exp(
         - log(j) +
-        logabsbinomial(j + s0r - 2, j - 1)[1] +
-        s0r * log(θ0) +
+        logabsbinomial(j + s0 - 2, j - 1)[1] +
+        s0 * log(θ0) +
         (j - 1) * log(1 - θ0) +
-        log(_₂F₁(j + s0r - 1, 1, j + 1, 1 - θ0))
+        log(_₂F₁(j + s0 - 1, 1, j + 1, 1 - θ0))
     )
 end
 
 function update_β!(rng::AbstractRNG, sampler::Sampler)
-    (; r, βsmpl) = sampler
-    @. βsmpl.y = r - 1
-    BayesNegativeBinomial.step!(rng, βsmpl)
+    (; r, rmodel) = sampler
+    @. rmodel.y = r - 1
+    BayesNegativeBinomial.step!(rng, rmodel)
 end
 
 function update_f!(sampler::Sampler)
-    (; N1, y1, X1, βsmpl, f, s0r) = sampler
+    (; N1, y1, X1, β, f, s) = sampler
     for i in 1:N1
         f[i] = 0.0
-        ϕ1 = 1 / (1 + exp(X1[i, :] ⋅ βsmpl.β))
+        ϕ1 = 1 / (1 + exp(X1[i, :] ⋅ β))
         for j in 1:m(sampler)
-            wj = get_w(ϕ1, s0r, j)
+            wj = get_w(ϕ1, s[], j)
             f[i] += wj * f0(sampler, y1[i], j)
         end
     end
@@ -142,14 +143,14 @@ function step!(rng::AbstractRNG, mdl::Sampler)
 end
 
 function sample(rng::AbstractRNG, smpl::Sampler; mcmcsize = 4000, burnin = 2000)
-    (; N1, D1, f, βsmpl) = smpl
+    (; N1, D1, f, β) = smpl
     chainf = [zeros(N1) for _ in 1:(mcmcsize - burnin)]
     chainβ = [zeros(D1) for _ in 1:(mcmcsize - burnin)]
     for iter in 1:mcmcsize
         step!(rng, smpl)
         if iter > burnin
             chainf[iter - burnin] .= f
-            chainβ[iter - burnin] .= βsmpl.β
+            chainβ[iter - burnin] .= β
         end
     end
     return chainf, chainβ

@@ -172,12 +172,6 @@ rng = MersenneTwister(1);
 y0, X0, y1, X1, r0 = simulate_sample(rng, N0, N1);
 smpl = BNPRegressionGGA2021.Sampler(; y0, X0, y1, X1);
 chainf, chainβ = BNPRegressionGGA2021.sample(rng, smpl; mcmcsize = 10000, burnin = 5000);
-
-fb = mean(chainf);
-X0concat = @. string(X0[:, 2]) * " " * string(X0[:, 3]) * " " * string(X0[:, 4]);
-X1concat = @. string(X1[:, 2]) * " " * string(X1[:, 3]) * " " * string(X1[:, 4]);
-plot(x = y0, color = X0concat, Geom.density)
-plot(x = y1, y = fb, color = X1concat, Geom.line)
 mean([chainβ[i] .== zeros(11) for i in 1:length(chainβ)])
 
 # #=========================#

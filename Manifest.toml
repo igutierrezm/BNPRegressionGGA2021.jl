@@ -23,9 +23,9 @@ uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
 [[BayesNegativeBinomial]]
 deps = ["Distributions", "ExtractMacro", "LinearAlgebra", "PolyaGammaSamplers", "Random"]
-git-tree-sha1 = "bfecf5e86edf024100a95ea20ac14fb108af77db"
+git-tree-sha1 = "45a5965e851b57c9ea25156d7c63132404fe3b09"
 repo-rev = "master"
-repo-url = "git@github.com:igutierrezm/BayesNegativeBinomial.jl.git"
+repo-url = "https://github.com/igutierrezm/BayesNegativeBinomial.jl"
 uuid = "bfffd7ee-3ae3-4322-8549-de099c477cdc"
 version = "0.1.0"
 
@@ -222,8 +222,6 @@ uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 [[PolyaGammaSamplers]]
 deps = ["Distributions", "Random", "StatsFuns"]
 git-tree-sha1 = "a675f3a525406a8cc4b8d8c024a84e38baddf770"
-repo-rev = "master"
-repo-url = "https://github.com/igutierrezm/PolyaGammaSamplers.jl"
 uuid = "99ff7fc7-8a0f-4729-8284-81f1989d3fc6"
 version = "0.1.0"
 

@@ -18,6 +18,7 @@ SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 BSplines = "0.3"
 Distributions = "0.25"
 HypergeometricFunctions = "0.3"
+Revise = "3"
 SpecialFunctions = "1, 2"
 julia = "1.7"
 

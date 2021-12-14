@@ -1,4 +1,6 @@
-Base.@kwdef struct Sampler
+abstract type Sampler end
+
+Base.@kwdef struct NormalSampler <: Sampler
     # (Public) Data
     y0::Vector{Float64}
     X0::Matrix{Float64}
@@ -16,14 +18,10 @@ Base.@kwdef struct Sampler
     c0μ::Float64 = 2.0
     a0τ::Float64 = 1.0
     b0τ::Float64 = 1.0
-    a0θ::Float64 = 1.0
-    b0θ::Float64 = 1.0
     # (Private) Parameters
     ϕ::Vector{Float64} = ones(N0) / 2
     τ::Vector{Float64} = ones(N0)
     μ::Vector{Float64} = zeros(N0)
-    ȳ::Vector{Float64} = zeros(N0)
-    v::Vector{Float64} = zeros(N0)
     n::Vector{Int} = ones(Int, N0)
     r::Vector{Int} = ones(Int, N0)
     d::Vector{Int} = ones(Int, N0)
@@ -32,17 +30,59 @@ Base.@kwdef struct Sampler
         BayesNegativeBinomial.Sampler(ones(Int, N0), X0)
     β::Vector{Float64} = rmodel.β
     s::Vector{Int} = rmodel.s
+    ȳ::Vector{Float64} = zeros(N0)
+    v::Vector{Float64} = zeros(N0)
+end
+
+Base.@kwdef struct ErlangSampler <: Sampler
+    # (Public) Data
+    y0::Vector{Float64}
+    X0::Matrix{Float64}
+    y1::Vector{Float64}
+    X1::Matrix{Float64}
+    # (Private) Data
+    N0::Int = size(X0, 1)
+    N1::Int = size(X1, 1)
+    D0::Int = size(X0, 2)
+    D1::Int = size(X1, 2)
+    # (Public) HyperParameters
+    m0β::Vector{Float64} = zeros(D0)
+    Σ0β::Matrix{Float64} = 3 * I(D0)
+    a0φ::Float64 = 0.1
+    b0φ::Float64 = 0.1
+    a0λ::Float64 = 2.0
+    b0λ::Float64 = 0.1
+    # (Private) Parameters
+    ϕ::Vector{Float64} = ones(N0) / 2
+    φ::Vector{Float64} = 2 * ones(N0)
+    λ::Vector{Float64} = [1]
+    n::Vector{Int} = ones(Int, N0)
+    r::Vector{Int} = ones(Int, N0)
+    d::Vector{Int} = ones(Int, N0)
+    f::Vector{Float64} = zeros(N1)
+    rmodel::BayesNegativeBinomial.Sampler = 
+        BayesNegativeBinomial.Sampler(ones(Int, N0), X0)
+    β::Vector{Float64} = rmodel.β
+    s::Vector{Int} = rmodel.s
+    sumy::Vector{Float64} = [0.0]
+    sumlogy::Vector{Float64} = zeros(N0)
 end
 
 function m(sampler::Sampler)
-    maximum(sampler.r)
+    return maximum(sampler.r)
 end
 
-function f0(sampler::Sampler, yi, j)
-    pdf(Normal(sampler.μ[j], 1 / √sampler.τ[j]), yi)
+function f0(sampler::NormalSampler, yi, j)
+    kernel = Normal(sampler.μ[j], 1 / √sampler.τ[j])
+    return pdf(kernel, yi)
 end
 
-function update_suffstats!(sampler::Sampler)
+function f0(sampler::ErlangSampler, yi, j)
+    kernel = Erlang(ceil(Int, sampler.φ[j]), 1.0 / sampler.λ[])
+    return pdf(kernel, yi)
+end
+
+function update_suffstats!(sampler::NormalSampler)
     (; N0, y0, d, ȳ, v, n) = sampler 
     jmax = m(sampler)
     for j in 1:jmax
@@ -63,7 +103,72 @@ function update_suffstats!(sampler::Sampler)
     end
 end
 
-function update_χ!(rng::AbstractRNG, sampler::Sampler)
+function update_suffstats!(sampler::ErlangSampler)
+    (; y0, sumlogy, sumy, d, N0) = sampler
+    jmax = m(sampler)
+    for j in 1:jmax
+        sumlogy[j] = 0.0
+    end
+    sumy[] = 0.0
+    for i in 1:N0
+        sumlogy[d[i]] += log(y0[i])
+        sumy[] += y0[i]
+    end
+    return nothing
+end
+
+function logpφ(sampler::ErlangSampler, φ0, j)
+    (; λ, a0φ, b0φ, sumlogy, n) = sampler
+    δ0 = ceil(Int, φ0)
+    return (
+        n[j] * δ0 * log(λ[]) +
+        (δ0 - 1) * sumlogy[j] -
+        n[j] * logfactorial(δ0 - 1) +
+        (a0φ - 1) * log(φ0) -
+        b0φ * φ0
+    )
+end
+
+function update_φ!(rng::AbstractRNG, sampler::ErlangSampler)
+    (; φ, a0φ, b0φ, n) = sampler
+    pφ = Gamma(a0φ, 1.0 / b0φ)
+    for j in 1:m(sampler)
+        if n[j] == 0
+            φ[j] = rand(rng, pφ)
+        else
+            φ0 = φ[j]
+            d0 = truncated(Normal(φ0, 0.1), 0, Inf)
+            φ1 = rand(rng, d0)
+            d1 = truncated(Normal(φ1, 0.1), 0, Inf)
+            log_ar = 0.0
+            log_ar += (logpφ(sampler, φ1, j) + logpdf(d1, φ0))
+            log_ar -= (logpφ(sampler, φ0, j) + logpdf(d0, φ1))
+            if rand(rng) < exp(log_ar)
+                (φ[j] = φ1)
+            end
+        end
+    end
+    return nothing
+end
+
+function update_λ!(rng::AbstractRNG, sampler::ErlangSampler)
+    (; λ, φ, a0λ, b0λ, d, sumy) = sampler
+    a1λ = a0λ
+    b1λ = b0λ + sumy[]
+     for di in d
+        a1λ += ceil(φ[di])
+    end
+    λ[] = rand(rng, Gamma(a1λ, 1.0 / b1λ))
+    return nothing
+end
+
+function update_χ!(rng::AbstractRNG, sampler::ErlangSampler)
+    update_suffstats!(sampler)
+    update_φ!(rng, sampler)
+    update_λ!(rng, sampler)
+end
+
+function update_χ!(rng::AbstractRNG, sampler::NormalSampler)
     (; μ, τ, n, ȳ, v, m0μ, c0μ, a0τ, b0τ) = sampler
     update_suffstats!(sampler)
     for j in 1:m(sampler)

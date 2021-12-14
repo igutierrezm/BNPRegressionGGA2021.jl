@@ -26,7 +26,7 @@ end
 N0, N1 = 1000, 50;
 rng = MersenneTwister(1);
 y0, X0, y1, X1 = simulate_sample_01(rng, N0, N1);
-smpl = BNPRegressionGGA2021.Sampler(; y0, X0, y1, X1);
+smpl = BNPRegressionGGA2021.NormalSampler(; y0, X0, y1, X1);
 chainf, chainβ = BNPRegressionGGA2021.sample(rng, smpl; mcmcsize = 4000, burnin = 2000);
 
 f1 = mean(chainf);
@@ -54,7 +54,7 @@ end
 N0, N1 = 1000, 50
 rng = MersenneTwister(1);
 y0, X0, y1, X1 = simulate_sample(rng, N0, N1);
-smpl = BNPRegressionGGA2021.Sampler(; y0, X0, y1, X1);
+smpl = BNPRegressionGGA2021.NormalSampler(; y0, X0, y1, X1);
 chainf, chainβ = BNPRegressionGGA2021.sample(rng, smpl; mcmcsize = 10000, burnin = 5000);
 
 fb = mean(chainf);
@@ -81,7 +81,7 @@ end
 N0, N1 = 1000, 50
 rng = MersenneTwister(1);
 y0, X0, y1, X1 = simulate_sample(rng, N0, N1);
-smpl = BNPRegressionGGA2021.Sampler(; y0, X0, y1, X1);
+smpl = BNPRegressionGGA2021.NormalSampler(; y0, X0, y1, X1);
 chainf, chainβ = BNPRegressionGGA2021.sample(rng, smpl; mcmcsize = 10000, burnin = 5000);
 
 fb = mean(chainf);
@@ -110,7 +110,7 @@ end
 N0, N1 = 1000, 50
 rng = MersenneTwister(1);
 y0, X0, y1, X1 = simulate_sample(rng, N0, N1);
-smpl = BNPRegressionGGA2021.Sampler(; y0, X0, y1, X1);
+smpl = BNPRegressionGGA2021.NormalSampler(; y0, X0, y1, X1);
 chainf, chainβ = BNPRegressionGGA2021.sample(rng, smpl; mcmcsize = 10000, burnin = 5000);
 
 fb = mean(chainf);
@@ -141,7 +141,7 @@ end
 N0, N1 = 1000, 50
 rng = MersenneTwister(1);
 y0, X0, y1, X1 = simulate_sample(rng, N0, N1);
-smpl = BNPRegressionGGA2021.Sampler(; y0, X0, y1, X1);
+smpl = BNPRegressionGGA2021.NormalSampler(; y0, X0, y1, X1);
 chainf, chainβ = BNPRegressionGGA2021.sample(rng, smpl; mcmcsize = 10000, burnin = 5000);
 
 fb = mean(chainf);
@@ -170,7 +170,7 @@ end
 N0, N1 = 1000, 50
 rng = MersenneTwister(1);
 y0, X0, y1, X1 = simulate_sample(rng, N0, N1);
-smpl = BNPRegressionGGA2021.Sampler(; y0, X0, y1, X1);
+smpl = BNPRegressionGGA2021.NormalSampler(; y0, X0, y1, X1);
 chainf, chainβ = BNPRegressionGGA2021.sample(rng, smpl; mcmcsize = 10000, burnin = 5000);
 mean([chainβ[i] .== zeros(11) for i in 1:length(chainβ)])
 
@@ -212,7 +212,7 @@ mean([chainβ[i] .== zeros(11) for i in 1:length(chainβ)])
 # rng = MersenneTwister(1);
 # y0, X0, y1, X1 = simulate_sample(rng, N);
 # data = BNPRegressionGGA2021.Data(; y0, X0, y1, X1);
-# smpl = BNPRegressionGGA2021.Sampler(data);
+# smpl = BNPRegressionGGA2021.NormalSampler(data);
 # chainf, chainβ = BNPRegressionGGA2021.sample(rng, smpl; mcmcsize = 10000, burnin = 5000);
 
 # fb = mean(chainf);
@@ -241,7 +241,7 @@ mean([chainβ[i] .== zeros(11) for i in 1:length(chainβ)])
 # rng = MersenneTwister(1);
 # y0, x0, X0, y1, x1, X1 = simulate_sample_03(rng, N0);
 # data = BNPRegressionGGA2021.Data(; y0, X0, y1, X1);
-# smpl = BNPRegressionGGA2021.Sampler(data);
+# smpl = BNPRegressionGGA2021.NormalSampler(data);
 # chainf, chainβ = BNPRegressionGGA2021.sample(rng, smpl; mcmcsize = 10000, burnin = 5000);
 
 # f1 = mean(chainf);
@@ -268,7 +268,7 @@ mean([chainβ[i] .== zeros(11) for i in 1:length(chainβ)])
 # N0, N1 = 1000, 50
 # rng = MersenneTwister(1);
 # y0, X0, y1, X1 = simulate_sample(rng, N0, N1);
-# smpl = BNPRegressionGGA2021.Sampler(; y0, X0, y1, X1);
+# smpl = BNPRegressionGGA2021.NormalSampler(; y0, X0, y1, X1);
 # chainf, chainβ = BNPRegressionGGA2021.sample(rng, smpl; mcmcsize = 20000, burnin = 10000);
 
 # fb = mean(chainf);
@@ -293,7 +293,7 @@ mean([chainβ[i] .== zeros(11) for i in 1:length(chainβ)])
 # N0, N1 = 2000, 50
 # rng = MersenneTwister(1);
 # y0, X0, y1, X1 = simulate_sample(rng, N0, N1);
-# smpl = BNPRegressionGGA2021.Sampler(; y0, X0, y1, X1);
+# smpl = BNPRegressionGGA2021.NormalSampler(; y0, X0, y1, X1);
 # chainf, chainβ = BNPRegressionGGA2021.sample(rng, smpl; mcmcsize = 10000, burnin = 5000);
 
 # fb = mean(chainf);

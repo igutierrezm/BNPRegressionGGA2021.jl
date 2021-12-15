@@ -19,6 +19,7 @@ SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 
 [compat]
 BSplines = "0.3"
+CSV = "0.9"
 Distributions = "0.25"
 HypergeometricFunctions = "0.3"
 SpecialFunctions = "1, 2"

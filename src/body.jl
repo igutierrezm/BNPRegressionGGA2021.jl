@@ -22,7 +22,7 @@ Base.@kwdef struct NormalSampler <: Sampler
     ϕ::Vector{Float64} = ones(N0) / 2
     τ::Vector{Float64} = ones(N0)
     μ::Vector{Float64} = zeros(N0)
-    n::Vector{Int} = ones(Int, N0)
+    n::Vector{Int} = [N0; zeros(Int, N0 - 1)]
     r::Vector{Int} = ones(Int, N0)
     d::Vector{Int} = ones(Int, N0)
     f::Vector{Float64} = zeros(N1)
@@ -48,15 +48,15 @@ Base.@kwdef struct ErlangSampler <: Sampler
     # (Public) HyperParameters
     m0β::Vector{Float64} = zeros(D0)
     Σ0β::Matrix{Float64} = 3 * I(D0)
-    a0φ::Float64 = 0.1
-    b0φ::Float64 = 0.1
-    a0λ::Float64 = 2.0
+    a0φ::Float64 = 1.0
+    b0φ::Float64 = 0.5
+    a0λ::Float64 = 0.1
     b0λ::Float64 = 0.1
     # (Private) Parameters
     ϕ::Vector{Float64} = ones(N0) / 2
-    φ::Vector{Float64} = 2 * ones(N0)
-    λ::Vector{Float64} = [1]
-    n::Vector{Int} = ones(Int, N0)
+    φ::Vector{Float64} = rand(Gamma(a0φ, 1.0 / b0φ), N0)
+    λ::Vector{Float64} = rand(Gamma(a0λ, 1.0 / b0λ), 1)
+    n::Vector{Int} = [N0; zeros(Int, N0 - 1)]
     r::Vector{Int} = ones(Int, N0)
     d::Vector{Int} = ones(Int, N0)
     f::Vector{Float64} = zeros(N1)
@@ -104,15 +104,17 @@ function update_suffstats!(sampler::NormalSampler)
 end
 
 function update_suffstats!(sampler::ErlangSampler)
-    (; y0, sumlogy, sumy, d, N0) = sampler
+    (; y0, sumlogy, sumy, d, n, N0) = sampler
     jmax = m(sampler)
     for j in 1:jmax
+        n[j] = 0
         sumlogy[j] = 0.0
     end
     sumy[] = 0.0
     for i in 1:N0
-        sumlogy[d[i]] += log(y0[i])
+        n[d[i]] += 1
         sumy[] += y0[i]
+        sumlogy[d[i]] += log(y0[i])
     end
     return nothing
 end
@@ -195,6 +197,18 @@ function update_d!(rng::AbstractRNG, sampler::Sampler)
     return nothing
 end
 
+function update_n!(sampler::Sampler)
+    (; N0, d, n) = sampler 
+    jmax = m(sampler)
+    for j in 1:jmax
+        n[j] = 0
+    end
+    for i in 1:N0
+        n[d[i]] += 1
+    end
+    return nothing
+end
+
 function update_ϕ!(sampler::Sampler)
     (; X0, β, ϕ) = sampler
     mul!(ϕ, X0, β)
@@ -216,7 +230,7 @@ function get_w(θ0, s0, j)
         logabsbinomial(j + s0 - 2, j - 1)[1] +
         s0 * log(θ0) +
         (j - 1) * log(1 - θ0) +
-        log(_₂F₁(j + s0 - 1, 1, j + 1, 1 - θ0))
+        log(_₂F₁(BigFloat(j + s0 - 1), 1, j + 1, 1 - θ0))
     )
 end
 
@@ -241,6 +255,7 @@ end
 function step!(rng::AbstractRNG, mdl::Sampler)
     update_χ!(rng, mdl)
     update_d!(rng, mdl)
+    # update_n!(mdl)
     update_f!(mdl)
     update_ϕ!(mdl)
     update_r!(rng, mdl)

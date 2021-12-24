@@ -48,8 +48,8 @@ Base.@kwdef struct ErlangSampler <: Sampler
     # (Public) HyperParameters
     m0β::Vector{Float64} = zeros(D0)
     Σ0β::Matrix{Float64} = 3 * I(D0)
-    a0φ::Float64 = 1.0
-    b0φ::Float64 = 0.5
+    a0φ::Float64 = 2.0
+    b0φ::Float64 = 0.1
     a0λ::Float64 = 0.1
     b0λ::Float64 = 0.1
     # (Private) Parameters

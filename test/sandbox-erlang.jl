@@ -10,6 +10,7 @@ using Random
 # using Test
 # using LinearAlgebra
 
+
 #=================================#
 # Example 1 - 1 trivial predictor #
 #=================================#
@@ -28,10 +29,10 @@ function simulate_sample_01(rng, N0, N1)
 end
 
 N0, N1 = 500, 50;
-rng = MersenneTwister(1);
+rng = MersenneTwister(2);
 dy, event, z0, ỹ0, X0, y1, X1 = simulate_sample_01(rng, N0, N1);
 mean(event)
-smpl = BNPRegressionGGA2021.ErlangSampler(; ỹ0, X0, y1, X1);
+smpl = BNPRegressionGGA2021.ErlangSampler(; rng, ỹ0, X0, y1, X1);
 chainf, chainβ = BNPRegressionGGA2021.sample(rng, smpl; mcmcsize = 20000, burnin = 10000);
 plot(
     layer(x = y1, y = mean(chainf), Geom.line, color=["bnp"]), 
@@ -93,6 +94,39 @@ function simulate_sample_01(rng, N0, N1)
     ỹ1 = rand(rng, Exponential(30), N0)
     event = ỹ0 .< ỹ1    
     y1 = LinRange(0, 6, N1) |> collect  |> x -> repeat(x, 4)
+    return dy1, dy2, event, z0, ỹ0, X0, y1, X1
+end
+
+N0, N1 = 1000, 50;
+rng = MersenneTwister(2);
+dy1, dy2, event, z0, ỹ0, X0, y1, X1 = simulate_sample_01(rng, N0, N1);
+ygrid = LinRange(0, 6, N1) |> collect;
+plot(
+    layer(x = ygrid, y = pdf.(dy2, ygrid), Geom.line, color=["pdf2"]),
+    layer(x = ygrid, y = pdf.(dy1, ygrid), Geom.line, color=["pdf1"]),
+)
+plot(
+    layer(x = ygrid, y = pdf.(dy2, ygrid) ./ (1.0 .- cdf.(dy2, ygrid)), Geom.line, color=["pdf2"]),
+    layer(x = ygrid, y = pdf.(dy1, ygrid) ./ (1.0 .- cdf.(dy1, ygrid)), Geom.line, color=["pdf1"]),
+)
+smpl = BNPRegressionGGA2021.ErlangSampler(; rng, ỹ0, X0, y1, X1);
+chainf, chainβ = BNPRegressionGGA2021.sample(rng, smpl; mcmcsize = 20000, burnin = 10000);
+plot(x = y1, y = mean(chainf), color = string.(X1[:, 2]) .* " + " .* string.(X1[:, 3]), Geom.line)
+
+#===================================================#
+# Example 4 - 1 trivial and 4 non-trivial predictor #
+#===================================================#
+
+function simulate_sample_01(rng, N0, N1)
+    dy1 = LogNormal(0, 0.5)
+    dy2 = MixtureModel(LogNormal, [(0.0, 1.0), (1.0, 0.25)], [0.6, 0.4]);
+    X0 = [ones(N0) rand(rng, [1, 2], N0, 5)]
+    X1 = kron(ones(N1), [1 1 1 ones(1, 3); 1 2 1 ones(1, 3); 1 1 2 ones(1, 3); 1 2 2 ones(1, 3)])
+    z0 = [X0[i, 2] == 2 ? rand(rng, dy2) : rand(rng, dy1) for i in 1:N0]
+    ỹ0 = deepcopy(z0)
+    ỹ1 = rand(rng, Exponential(30), N0)
+    event = ỹ0 .< ỹ1    
+    y1 = LinRange(0, 6, N1) |> collect  |> x -> repeat(x, size(X1, 1) ÷ N1)
     return dy1, dy2, event, z0, ỹ0, X0, y1, X1
 end
 

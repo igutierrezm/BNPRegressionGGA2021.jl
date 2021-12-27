@@ -36,10 +36,12 @@ end
 
 Base.@kwdef struct ErlangSampler <: Sampler
     # (Public) Data
-    y0::Vector{Float64}
+    ỹ0::Vector{Float64}
+    y0::Vector{Float64} = deepcopy(ỹ0)
     X0::Matrix{Float64}
     y1::Vector{Float64}
     X1::Matrix{Float64}
+    event::Vector{Bool} = ones(length(y0))
     # (Private) Data
     N0::Int = size(X0, 1)
     N1::Int = size(X1, 1)
@@ -66,6 +68,10 @@ Base.@kwdef struct ErlangSampler <: Sampler
     s::Vector{Int} = rmodel.s
     sumy::Vector{Float64} = [0.0]
     sumlogy::Vector{Float64} = zeros(N0)
+end
+
+function y(sampler::Sampler)
+    return sampler.y0
 end
 
 function m(sampler::Sampler)
@@ -181,6 +187,7 @@ function update_χ!(rng::AbstractRNG, sampler::NormalSampler)
         τ[j] = rand(rng, Gamma(aτ1, 1 / bτ1))
         μ[j] = mμ1 + randn(rng) * √(cμ1 / τ[j])
     end
+    update_y!(rng, mdl)
 end
 
 function update_d!(rng::AbstractRNG, sampler::Sampler)
@@ -251,6 +258,18 @@ function update_f!(sampler::Sampler)
         end
     end
 end
+
+function update_y!(rng::AbstractRNG, mdl::ErlangSampler)
+    (; N0, y0, ỹ0, event) = mdl
+    for i in 1:N0
+        if !event[i]
+            pdf = Erlang(ceil(Int, sampler.φ[d[i]]), 1.0 / sampler.λ[])
+            tpdf = Truncated(pdf, ỹ0[i], Inf)
+            y0[i] = rand(rng, tpdf)
+        end
+    end
+end
+
 
 function step!(rng::AbstractRNG, mdl::Sampler)
     update_χ!(rng, mdl)

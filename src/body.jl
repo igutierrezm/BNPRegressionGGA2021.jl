@@ -2,6 +2,7 @@ abstract type Sampler end
 
 Base.@kwdef struct NormalSampler <: Sampler
     # (Public) Data
+    rng::MersenneTwister
     y0::Vector{Float64}
     X0::Matrix{Float64}
     y1::Vector{Float64}
@@ -36,6 +37,7 @@ end
 
 Base.@kwdef struct ErlangSampler <: Sampler
     # (Public) Data
+    rng::MersenneTwister
     ỹ0::Vector{Float64}
     y0::Vector{Float64} = deepcopy(ỹ0)
     X0::Matrix{Float64}
@@ -56,8 +58,8 @@ Base.@kwdef struct ErlangSampler <: Sampler
     b0λ::Float64 = 0.1
     # (Private) Parameters
     ϕ::Vector{Float64} = ones(N0) / 2
-    φ::Vector{Float64} = rand(Gamma(a0φ, 1.0 / b0φ), N0)
-    λ::Vector{Float64} = rand(Gamma(a0λ, 1.0 / b0λ), 1)
+    φ::Vector{Float64} = rand(rng, Gamma(a0φ, 1.0 / b0φ), N0)
+    λ::Vector{Float64} = rand(rng, Gamma(a0λ, 1.0 / b0λ), 1)
     n::Vector{Int} = [N0; zeros(Int, N0 - 1)]
     r::Vector{Int} = ones(Int, N0)
     d::Vector{Int} = ones(Int, N0)

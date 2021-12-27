@@ -66,7 +66,7 @@ function simulate_sample_01(rng, N0, N1)
 end
 
 N0, N1 = 1000, 50;
-rng = MersenneTwister(2);
+rng = MersenneTwister(1);
 dy1, dy2, event, z0, ỹ0, X0, y1, X1 = simulate_sample_01(rng, N0, N1);
 mean(event)
 grid = LinRange(0, 6, N1) |> collect;
@@ -97,9 +97,9 @@ function simulate_sample_01(rng, N0, N1)
 end
 
 N0, N1 = 1000, 50;
-rng = MersenneTwister(1);
+rng = MersenneTwister(2);
 dy1, dy2, event, z0, ỹ0, X0, y1, X1 = simulate_sample_01(rng, N0, N1);
-ygrid = LinRange(0, 6, N1) |> collect
+ygrid = LinRange(0, 6, N1) |> collect;
 plot(
     layer(x = ygrid, y = pdf.(dy2, ygrid), Geom.line, color=["pdf2"]),
     layer(x = ygrid, y = pdf.(dy1, ygrid), Geom.line, color=["pdf1"]),
@@ -108,7 +108,6 @@ plot(
     layer(x = ygrid, y = pdf.(dy2, ygrid) ./ (1.0 .- cdf.(dy2, ygrid)), Geom.line, color=["pdf2"]),
     layer(x = ygrid, y = pdf.(dy1, ygrid) ./ (1.0 .- cdf.(dy1, ygrid)), Geom.line, color=["pdf1"]),
 )
-smpl = BNPRegressionGGA2021.ErlangSampler(; ỹ0, X0, y1, X1);
+smpl = BNPRegressionGGA2021.ErlangSampler(; rng, ỹ0, X0, y1, X1);
 chainf, chainβ = BNPRegressionGGA2021.sample(rng, smpl; mcmcsize = 20000, burnin = 10000);
 plot(x = y1, y = mean(chainf), color = string.(X1[:, 2]) .* " + " .* string.(X1[:, 3]), Geom.line)
-plot(x = y0, color = string.(X0[:, 2]) .* string.(X0[:, 3]), Geom.density)

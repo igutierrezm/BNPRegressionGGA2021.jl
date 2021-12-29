@@ -12,15 +12,18 @@ const BNB = BayesNegativeBinomial
 # All DGPM models are subtypes of AbstractModel:
 abstract type AbstractModel end
 
-# # All subtypes of AbstractModel must extend (by composition) the Skeleton type:
-# include("skeleton.jl")
+# All subtypes of AbstractModel must extend (by composition) the Skeleton type:
+include("skeleton.jl")
 
-# # All subtypes of AbstractModel must implement the following interface:
-# include("interface.jl")
+# All subtypes of AbstractModel must implement the following interface:
+include("interface.jl")
 
-# # The methods available for any AbstractModel are described here:
-# include("methods.jl")
+# The methods available for any AbstractModel are described here:
+include("methods.jl")
 
-include("body.jl")
+# The specific models are implemented here:
+include("dgpmnormal.jl")
+include("dgpmerlang.jl")
 
 end
+

@@ -23,12 +23,3 @@ Return the kernel pdf at `y0`, given a cluster label equal to `j`.
 function kernel_pdf(m::AbstractModel, y0, j::Int)
     error("not implemented")
 end
-
-"""
-    y(m::AbstractModel)
-    
-Return the outcome vector.
-"""
-function kernel_pdf(m::AbstractModel, y0, j::Int)
-    error("not implemented")
-end

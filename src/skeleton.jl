@@ -14,27 +14,18 @@ Base.@kwdef struct Skeleton
     Σ0β::Matrix{Float64} = 2 * I(D0)
     # Parameters
     rmodel::BNB.Sampler = BNB.Sampler(ones(Int, N0), X0)
-    n::Vector{Int} = ones(Int, N0)
     r::Vector{Int} = ones(Int, N0)
     d::Vector{Int} = ones(Int, N0)
     β::Vector{Float64} = rmodel.β
     s::Vector{Int} = rmodel.s
     # Transformed parameters
-    rmax::Base.RefValue{Int} = Ref(1)
-    ϕ::Vector{Float64} = ones(N0) / 2
+    n::Vector{Int} = [N0]
+    rmax::Base.RefValue{Int} = Ref(maximum(r))
+    ϕ0::Vector{Float64} = ones(N0) / 2
+    ϕ1::Vector{Float64} = ones(N1) / 2
     f::Vector{Float64} = ones(N1)
 end
 
-"""
-    rmax(s::Skeleton)
-    
-Return `maximum(r)`.
-"""
 rmax(s::Skeleton) = s.rmax[]
-
-"""
-    cluster_labels(s::Skeleton)
-    
-Return the cluster labels of each point.
-"""
+cluster_sizes(s::Skeleton) = s.n
 cluster_labels(s::Skeleton) = s.d

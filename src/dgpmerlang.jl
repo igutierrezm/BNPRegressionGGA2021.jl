@@ -35,6 +35,7 @@ function update_atoms!(m::DGPMErlang)
     update_suffstats!(m)
     update_φ!(m)
     update_λ!(m)
+    update_y!(m)
 end
 
 function update_suffstats!(m::DGPMErlang)
@@ -98,4 +99,15 @@ function logpφ(m::DGPMErlang, φ0, j)
         (a_φ0 - 1) * log(φ0) -
         b_φ0 * φ0
     )
+end
+
+function update_y!(m::DGPMErlang)
+    (; y0, c0, event) = m
+    for i in 1:length(y0)
+        if !event[i]
+            pdf = Erlang(ceil(Int, sampler.φ[d[i]]), 1.0 / sampler.λ[])
+            tpdf = Truncated(pdf, c0[i], Inf)
+            y0[i] = rand(tpdf)
+        end
+    end
 end

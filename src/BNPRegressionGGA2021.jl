@@ -6,6 +6,7 @@ using HypergeometricFunctions
 using LinearAlgebra
 using Random
 using SpecialFunctions
+using Walker2020Sampling
 
 const BNB = BayesNegativeBinomial
 
@@ -24,6 +25,7 @@ include("methods.jl")
 # The specific models are implemented here:
 include("dgpmnormal.jl")
 include("dgpmerlang.jl")
+include("dgpmbeta.jl")
 
 end
 

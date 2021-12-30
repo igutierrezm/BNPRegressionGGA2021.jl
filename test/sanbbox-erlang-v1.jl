@@ -30,8 +30,8 @@ chainf, chainβ = BNP.sample!(m; mcmcsize = 20000, burnin = 10000);
 plot(
     layer(x = y1, y = mean(chainf), Geom.line, color=["bnp"]), 
     layer(x = y1, y = pdf.(dy, y1), Geom.line, color=["true"]),
-    # layer(x = z0, Geom.histogram(density = true), color=["hist"])
 )
+mean(m.event)
 
 #=====================================#
 # Example 2 - 1 non-trivial predictor #
@@ -57,9 +57,14 @@ plot(
     layer(x = grid, y = pdf.(dy2, grid), Geom.line, color=["kdensity2"]),
     layer(x = grid, y = pdf.(dy1, grid), Geom.line, color=["kdensity1"]),
 )
+plot(
+    layer(x = ygrid, y = pdf.(dy2, ygrid) ./ (1.0 .- cdf.(dy2, ygrid)), Geom.line, color=["pdf2"]),
+    layer(x = ygrid, y = pdf.(dy1, ygrid) ./ (1.0 .- cdf.(dy1, ygrid)), Geom.line, color=["pdf1"]),
+)
 m = BNP.DGPMErlang(; c0, y0, X0, y1, X1);
 chainf, chainβ = BNP.sample!(m; mcmcsize = 20000, burnin = 10000);
 plot(x = y1, y = mean(chainf), color = string.(X1[:, 2]), Geom.line)
+mean(m.event)
 
 #===================================================#
 # Example 3 - 1 trivial and 1 non-trivial predictor #
@@ -85,13 +90,11 @@ plot(
     layer(x = ygrid, y = pdf.(dy2, ygrid), Geom.line, color=["pdf2"]),
     layer(x = ygrid, y = pdf.(dy1, ygrid), Geom.line, color=["pdf1"]),
 )
-plot(
-    layer(x = ygrid, y = pdf.(dy2, ygrid) ./ (1.0 .- cdf.(dy2, ygrid)), Geom.line, color=["pdf2"]),
-    layer(x = ygrid, y = pdf.(dy1, ygrid) ./ (1.0 .- cdf.(dy1, ygrid)), Geom.line, color=["pdf1"]),
-)
+
 m = BNP.DGPMErlang(; c0, y0, X0, y1, X1);
 chainf, chainβ = BNP.sample!(m; mcmcsize = 20000, burnin = 10000);
 plot(x = y1, y = mean(chainf), color = string.(X1[:, 2]), Geom.line)
+mean(m.event)
 
 #===================================================#
 # Example 4 - 1 trivial and 4 non-trivial predictor #
@@ -120,3 +123,4 @@ plot(
 m = BNP.DGPMErlang(; c0, y0, X0, y1, X1);
 chainf, chainβ = BNP.sample!(m; mcmcsize = 20000, burnin = 10000);
 plot(x = y1, y = mean(chainf), color = string.(X1[:, 2]), Geom.line)
+mean(m.event)

@@ -33,8 +33,8 @@ end
 
 function update_atoms!(m::DGPMErlang)
     update_suffstats!(m)
-    update_φ!(m)
     update_λ!(m)
+    update_φ!(m)
     update_y!(m)
 end
 
@@ -102,10 +102,11 @@ function logpφ(m::DGPMErlang, φ0, j)
 end
 
 function update_y!(m::DGPMErlang)
-    (; y0, c0, event) = m
+    (; y0, c0, event, φ, λ, skl) = m
+    d = cluster_labels(skl)
     for i in 1:length(y0)
         if !event[i]
-            pdf = Erlang(ceil(Int, sampler.φ[d[i]]), 1.0 / sampler.λ[])
+            pdf = Erlang(ceil(Int, φ[d[i]]), 1.0 / λ[])
             tpdf = Truncated(pdf, c0[i], Inf)
             y0[i] = rand(tpdf)
         end

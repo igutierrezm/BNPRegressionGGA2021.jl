@@ -108,7 +108,9 @@ function update_y!(m::DGPMErlang)
         if !event[i]
             pdf = Erlang(ceil(Int, φ[d[i]]), 1.0 / λ[])
             tpdf = Truncated(pdf, c0[i], Inf)
-            y0[i] = rand(tpdf)
+            if cdf(pdf, c0[i]) < 0.99
+                y0[i] = rand(tpdf)
+            end
         end
     end
 end

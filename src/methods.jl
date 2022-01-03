@@ -79,9 +79,7 @@ function update_n!(m::AbstractModel)
     while length(n) < rmax[] 
         push!(n, 0)
     end
-    for j in 1:rmax[]
-        n[j] = 0
-    end
+    n .= 0
     for i in 1:N0
         n[d[i]] += 1
     end

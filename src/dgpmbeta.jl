@@ -10,8 +10,8 @@ Base.@kwdef struct DGPMBeta <: AbstractModel
     # Parameters
     μ::Vector{Float64} = rand(1)
     v::Vector{Float64} = rand(Gamma(a_v0, 1 / b_v0), 1)
-    μ_shadow::Vector{Float64} = randexp(1) * 20.0
-    v_shadow::Vector{Float64} = randexp(1) * 20.0
+    μ_shadow::Vector{Float64} = randexp(1) * 10.0
+    v_shadow::Vector{Float64} = randexp(1) * 10.0
     # Transformed parameters
     sumlogy1::Vector{Float64} = zeros(1)
     sumlogy2::Vector{Float64} = zeros(1)
@@ -25,28 +25,22 @@ end
 
 function kernel_pdf(m::DGPMBeta, y0::Float64, j::Int)
     (; μ, v) = m
-    kernel = Beta(μ[j] / v[j], (1 - μ[j])/ v[j])
+    kernel = Beta(μ[j] * v[j], (1 - μ[j]) * v[j])
     return pdf(kernel, y0)
-    # μv = μ[j] * v[j]
-    # return exp(
-    #     (μv - 1) * log(y0) +
-    #     (μ[j] - μv - 1) * log(1.0 - y0) -
-    #     log_beta(μv, v[j] - μv)
-    # );
 end
 
 function update_atoms!(m::DGPMBeta)
     (; a_v0, b_v0, μ, v, μ_shadow, v_shadow, skl) = m
-    update_suffstats!(m)
     n = cluster_sizes(skl)
+    update_suffstats!(m)
     while length(μ) < rmax(skl)
         push!(μ, rand())
         push!(v, rand(Gamma(a_v0, 1 / b_v0)))
-        push!(μ_shadow, 20 * randexp())
-        push!(v_shadow, 20 * randexp())
+        push!(μ_shadow, 10 * randexp())
+        push!(v_shadow, 10 * randexp())
     end
-    s_μ = Walker2020Sampler(20.0, 0.0, 1.0);
-    s_v = Walker2020Sampler(20.0, 0.0, Inf);
+    s_μ = Walker2020Sampler(10.0, 0.0, 1.0);
+    s_v = Walker2020Sampler(10.0, 0.0, Inf);
     for j in 1:rmax(skl)
         if n[j] > 0
             μ[j], μ_shadow[j] = 
@@ -56,8 +50,8 @@ function update_atoms!(m::DGPMBeta)
         else 
             μ[j] = rand()
             v[j] = rand(Gamma(a_v0, 1 / b_v0))
-            μ_shadow[j] = 20 * randexp()
-            v_shadow[j] = 20 * randexp()
+            μ_shadow[j] = 10 * randexp()
+            v_shadow[j] = 10 * randexp()
         end
     end
 end

@@ -12,23 +12,23 @@ const BNP = BNPRegressionGGA2021
 #=================================#
 
 function simulate_sample(N0, N1)
-    dy = MixtureModel(Beta, [(1.0, 5.0), (5.0, 5.0), (10.0, 2.0)], [0.2, 0.5, 0.3])
+    dy = MixtureModel(Beta, [(1.0, 5.0), (10.0, 2.0)], [0.4, 0.6])
     X0 = ones(N0, 1)
     X1 = ones(N1, 1)
     y0 = rand(dy, N0)
     y1 = LinRange(0.0, 1.0, N1) |> collect
     return dy, y0, X0, y1, X1
-end
+end;
 
 Random.seed!(1);
 N0, N1 = 500, 50;
 dy, y0, X0, y1, X1 = simulate_sample(N0, N1);
 m = BNP.DGPMBeta(; y0, X0, y1, X1);
-chainf, chainβ = BNP.sample!(m; mcmcsize = 20000, burnin = 10000);
+chainf, chainβ = BNP.sample!(m; mcmcsize = 4000, burnin = 2000);
 plot(
     layer(x = y1, y = mean(chainf), Geom.line, color=["bnp"]), 
     layer(x = y1, y = pdf.(dy, y1), Geom.line, color=["true"]),
-    layer(x = y0, Geom.histogram(density = true), color=["hist"]),
+    layer(x = y0, Geom.histogram(density = true, bincount = 50), color=["hist"]),
 )
 
 #========================================================#

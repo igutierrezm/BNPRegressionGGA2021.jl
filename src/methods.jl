@@ -19,7 +19,6 @@ function step!(m::AbstractModel)
     update_f!(m)
     update_d!(m)
     update_r!(m)
-    update_rmax!(m)
     update_n!(m)
     update_β!(m)
 end
@@ -63,7 +62,7 @@ function update_d!(m::AbstractModel)
 end
 
 function update_r!(m::AbstractModel)
-    (; N0, X0, d, r, ϕ0, s, β) = skeleton(m)
+    (; N0, X0, d, r, ϕ0, s, β, rmax) = skeleton(m)
     mul!(ϕ0, X0, β)
     @. ϕ0 = 1.0 / (1.0 + exp(ϕ0))
     for i in 1:N0
@@ -71,12 +70,7 @@ function update_r!(m::AbstractModel)
         vi = rand(Gamma(r[i] + s[] - 1, 1))
         r[i] = rand(Poisson((1 - ϕ0[i]) * zi * vi)) + d[i]
     end
-    return nothing
-end
-
-function update_rmax!(m::AbstractModel)
-    skl = skeleton(m)
-    skl.rmax[] = maximum(skl.r)
+    rmax[] = maximum(r)
     return nothing
 end
 

@@ -5,13 +5,13 @@ Base.@kwdef struct DGPMBeta <: AbstractModel
     y1::Vector{Float64}
     X1::Matrix{Float64}
     # Hyperparameters
-    a_v0::Float64 = 2.0
-    b_v0::Float64 = 8.0
+    a_v0::Float64 = 1.0
+    b_v0::Float64 = 1.0
     # Parameters
     μ::Vector{Float64} = rand(1)
     v::Vector{Float64} = rand(Gamma(a_v0, 1 / b_v0), 1)
-    μ_shadow::Vector{Float64} = randexp(1) * 10.0
-    v_shadow::Vector{Float64} = randexp(1) * 10.0
+    μ_shadow::Vector{Float64} = randexp(1) * 20.0
+    v_shadow::Vector{Float64} = randexp(1) * 20.0
     # Transformed parameters
     sumlogy1::Vector{Float64} = zeros(1)
     sumlogy2::Vector{Float64} = zeros(1)
@@ -38,26 +38,26 @@ end
 function update_atoms!(m::DGPMBeta)
     (; a_v0, b_v0, μ, v, μ_shadow, v_shadow, skl) = m
     update_suffstats!(m)
-    n = cluster_labels(skl)
+    n = cluster_sizes(skl)
     while length(μ) < rmax(skl)
         push!(μ, rand())
         push!(v, rand(Gamma(a_v0, 1 / b_v0)))
-        push!(μ_shadow, 10 * randexp())
-        push!(v_shadow, 10 * randexp())
+        push!(μ_shadow, 20 * randexp())
+        push!(v_shadow, 20 * randexp())
     end
-    s_μ = Walker2020Sampler(10.0, 0.0, 1.0);
-    s_v = Walker2020Sampler(10.0, 0.0, Inf);
+    s_μ = Walker2020Sampler(20.0, 0.0, 1.0);
+    s_v = Walker2020Sampler(20.0, 0.0, Inf);
     for j in 1:rmax(skl)
         if n[j] > 0
             μ[j], μ_shadow[j] = 
-            rand(Random.GLOBAL_RNG, s_μ, x -> logpμ(m, x, j), μ[j], μ_shadow[j])
+                rand(Random.GLOBAL_RNG, s_μ, x -> logpμ(m, x, j), μ[j], μ_shadow[j])
             v[j], v_shadow[j] = 
                 rand(Random.GLOBAL_RNG, s_v, x -> logpv(m, x, j), v[j], v_shadow[j])
         else 
             μ[j] = rand()
             v[j] = rand(Gamma(a_v0, 1 / b_v0))
-            μ_shadow[j] = 10 * randexp()
-            v_shadow[j] = 10 * randexp()
+            μ_shadow[j] = 20 * randexp()
+            v_shadow[j] = 20 * randexp()
         end
     end
 end
@@ -87,7 +87,7 @@ function logpμ(m::DGPMBeta, μ0::Float64, j::Int)
     return (
         (μv - 1) * sumlogy1[j] +
         (μ0 - μv - 1) * sumlogy2[j] -
-        n[j] * log_beta(μv, v[j] - μv)
+        n[j] * logbeta(BigFloat(μv), BigFloat(v[j] - μv))
     )
 end
 
@@ -98,12 +98,8 @@ function logpv(m::DGPMBeta, v0::Float64, j::Int)
     return (
         (μv - 1) * sumlogy1[j] +
         (v0 - μv - 1) * sumlogy2[j] -
-        n[j] * log_beta(μv, v0 - μv) -
+        n[j] * logbeta(μv, v0 - μv) -
         (a_v0 + 1) * log(v0) - 
         b_v0 / v0
     )
-end
-
-function log_beta(x, y)
-    loggamma(x) + loggamma(y) - loggamma(x + y)
 end

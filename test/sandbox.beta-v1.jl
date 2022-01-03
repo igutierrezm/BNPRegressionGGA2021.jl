@@ -24,11 +24,12 @@ Random.seed!(1);
 N0, N1 = 500, 50;
 dy, y0, X0, y1, X1 = simulate_sample(N0, N1);
 m = BNP.DGPMBeta(; y0, X0, y1, X1);
-chainf, chainβ = BNP.sample!(m; mcmcsize = 4000, burnin = 2000);
+m.skl.s[1] = 5
+chainf, chainβ = BNP.sample!(m; mcmcsize = 10000, burnin = 5000);
 plot(
-    layer(x = y1, y = mean(chainf), Geom.line, color=["bnp"]), 
-    layer(x = y1, y = pdf.(dy, y1), Geom.line, color=["true"]),
-    layer(x = y0, Geom.histogram(density = true, bincount = 50), color=["hist"]),
+    layer(x = y1, y = mean(chainf), Geom.line, color = ["bnp"]), 
+    layer(x = y1, y = pdf.(dy, y1), Geom.line, color = ["true"]),
+    layer(x = y0, Geom.histogram(density = true, bincount = 50), color = ["hist"]),
 )
 
 #========================================================#

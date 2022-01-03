@@ -9,7 +9,7 @@ Base.@kwdef struct DGPMBeta <: AbstractModel
     b_v0::Float64 = 1.0
     # Parameters
     μ::Vector{Float64} = rand(1)
-    v::Vector{Float64} = rand(Gamma(a_v0, 1 / b_v0), 1)
+    v::Vector{Float64} = rand(InverseGamma(a_v0, b_v0), 1)
     μ_shadow::Vector{Float64} = randexp(1) * 10.0
     v_shadow::Vector{Float64} = randexp(1) * 10.0
     # Transformed parameters
@@ -35,7 +35,7 @@ function update_atoms!(m::DGPMBeta)
     update_suffstats!(m)
     while length(μ) < rmax(skl)
         push!(μ, rand())
-        push!(v, rand(Gamma(a_v0, 1 / b_v0)))
+        push!(v, rand(InverseGamma(a_v0, b_v0)))
         push!(μ_shadow, 10 * randexp())
         push!(v_shadow, 10 * randexp())
     end
@@ -49,7 +49,7 @@ function update_atoms!(m::DGPMBeta)
                 rand(Random.GLOBAL_RNG, s_v, x -> logpv(m, x, j), v[j], v_shadow[j])
         else 
             μ[j] = rand()
-            v[j] = rand(Gamma(a_v0, 1 / b_v0))
+            v[j] = rand(InverseGamma(a_v0, b_v0))
             μ_shadow[j] = 10 * randexp()
             v_shadow[j] = 10 * randexp()
         end
@@ -81,7 +81,7 @@ function logpμ(m::DGPMBeta, μ0::Float64, j::Int)
     return (
         (μv - 1) * sumlogy1[j] +
         (μ0 - μv - 1) * sumlogy2[j] -
-        n[j] * logbeta(BigFloat(μv), BigFloat(v[j] - μv))
+        n[j] * logbeta(μv, v[j] - μv)
     )
 end
 

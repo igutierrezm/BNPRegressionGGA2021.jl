@@ -83,8 +83,8 @@ m = BNP.DGPMNormal(; y0, X0, y1, X1);
 chainf, chainβ = BNP.sample!(m; mcmcsize = 2000, burnin = 1000);
 
 fb = mean(chainf);
-X0concat = @. string(X0[:, 2]) * " " * string(X0[:, 3])
-X1concat = @. string(X1[:, 2]) * " " * string(X1[:, 3])
+X0concat = @. string(X0[:, 2]) * " " * string(X0[:, 3]);
+X1concat = @. string(X1[:, 2]) * " " * string(X1[:, 3]);
 plot(x = y0, color = X0concat, Geom.density)
 plot(x = y1, y = fb, color = X1concat, Geom.line)
 mean(chainβ)

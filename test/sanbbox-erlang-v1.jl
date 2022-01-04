@@ -124,9 +124,9 @@ chainf, chainβ = BNP.sample!(m; mcmcsize = 40000, burnin = 20000);
 plot(x = y1, y = mean(chainf), color = string.(X1[:, end]), Geom.line)
 mean(m.event)
 
-#===================================================#
-# Example 5 - 1 trivial and 4 non-trivial predictor #
-#===================================================#
+#====================================================#
+# Example 5 - 1 non-trivial and 4 trivial predictors #
+#====================================================#
 
 function simulate_sample(N0, N1)
     dy1 = LogNormal(0, 0.3)

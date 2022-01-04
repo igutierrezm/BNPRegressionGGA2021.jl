@@ -24,7 +24,7 @@ Random.seed!(1);
 N0, N1 = 500, 50;
 dy, y0, X0, y1, X1 = simulate_sample(N0, N1);
 m = BNP.DGPMBeta(; y0, X0, y1, X1);
-m.skl.s[1] = 5
+# m.skl.s[1] = 5
 chainf, chainβ = BNP.sample!(m; mcmcsize = 10000, burnin = 5000);
 plot(
     layer(x = y1, y = mean(chainf), Geom.line, color = ["bnp"]), 

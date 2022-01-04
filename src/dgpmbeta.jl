@@ -80,7 +80,7 @@ function logpμ(m::DGPMBeta, μ0::Float64, j::Int)
     μv = μ0 * v[j]
     return (
         (μv - 1) * sumlogy1[j] +
-        (μ0 - μv - 1) * sumlogy2[j] -
+        (v[j] - μv - 1) * sumlogy2[j] -
         n[j] * logbeta(μv, v[j] - μv)
     )
 end

@@ -1,14 +1,14 @@
-function sample!(m::AbstractModel; mcmcsize = 4000, burnin = 2000)
+function sample!(m::AbstractModel; mcmcsize = 4000, burnin = 2000, thin = 1)
     (; N1, D1, f, β) = skeleton(m)
-    chainf = [zeros(N1) for _ in 1:(mcmcsize - burnin)]
-    chainβ = [zeros(D1) for _ in 1:(mcmcsize - burnin)]
-    chaing = [zeros(Bool, D1) for _ in 1:(mcmcsize - burnin)]
+    chainf = [zeros(N1) for _ in 1:(mcmcsize - burnin) ÷ thin]
+    chainβ = [zeros(D1) for _ in 1:(mcmcsize - burnin) ÷ thin]
+    chaing = [zeros(Bool, D1) for _ in 1:(mcmcsize - burnin) ÷ thin]
     for iter in 1:mcmcsize
         step!(m)
-        if iter > burnin
-            chainf[iter - burnin] .= f
-            chainβ[iter - burnin] .= β
-            chaing[iter - burnin] .= (β .!= 0.0)
+        if iter > burnin && iszero((iter - burnin) % thin)
+            chainf[(iter - burnin) ÷ thin] .= f
+            chainβ[(iter - burnin) ÷ thin] .= β
+            chaing[(iter - burnin) ÷ thin] .= (β .!= 0.0)
         end
     end
     return chainf, chainβ, chaing

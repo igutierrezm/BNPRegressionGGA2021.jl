@@ -11,9 +11,9 @@ simulate_sample <- function(D0, N0) {
   for (i in 1:N0) {
     if (X0[i, 5] == 1) {
       di = runif(1) < 0.6
-      y0[i] = di * rlnorm(1, -1.0,  1.0) + (1 - di) * rlnorm(1, 0.3,  1.0)
+      y0[i] = di * rlnorm(1, 0.0,  1.0) + (1 - di) * rlnorm(1, 0.3,  1.2)
     } else {
-      y0[i] = rlnorm(1, 0.0, 0.3)
+      y0[i] = rlnorm(1, 0.3, 0.7)
     }
   }
   t0 <- Surv(time = pmin(y0, c0), event = y0 < c0)
@@ -22,6 +22,10 @@ simulate_sample <- function(D0, N0) {
   df$y0 <- y0
   return(df)
 }
+
+data <- simulate_sample(5, 500)
+fit <- coxph(time ~ X1 + X2 + X3 + X4 + X5, data = data)
+broom::tidy(fit)
 
 simulate_test_results <- function(D0, N0, alpha) {
   data <- simulate_sample(D0, N0)

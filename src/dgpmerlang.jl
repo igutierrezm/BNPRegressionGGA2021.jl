@@ -7,6 +7,8 @@ Base.@kwdef struct DGPMErlang <: AbstractModel
     X1::Matrix{Float64}
     # Transformed data
     event::Vector{Bool} = y0 .< c0
+    N0::Int = length(y0)
+    N1::Int = length(y1)
     # HyperParameters
     a_φ0::Float64 = 2.0
     b_φ0::Float64 = 0.1
@@ -18,6 +20,7 @@ Base.@kwdef struct DGPMErlang <: AbstractModel
     # Transformed parameters
     sumy::Base.RefValue{Float64} = Ref(0.0)
     sumlogy::Vector{Float64} = zeros(1)
+    S::Vector{Float64} = zeros(N1)
     # Skeleton
     skl::Skeleton = Skeleton(; y0, y1, X0, X1)
 end
@@ -29,6 +32,11 @@ end
 function kernel_pdf(m::DGPMErlang, yi::Float64, j::Int)
     kernel = Erlang(ceil(Int, m.φ[j]), 1.0 / m.λ[])
     return pdf(kernel, yi)
+end
+
+function kernel_cdf(m::DGPMErlang, yi::Float64, j::Int)
+    kernel = Erlang(ceil(Int, m.φ[j]), 1.0 / m.λ[])
+    return 1 - cdf(kernel, yi)
 end
 
 function update_atoms!(m::DGPMErlang)
@@ -113,4 +121,36 @@ function update_y!(m::DGPMErlang)
             end
         end
     end
+end
+
+function update_S!(m::DGPMErlang)
+    (; S, skl) = m
+    (; N1, y1, ϕ1, s, rmax) = skl
+    for i in 1:N1
+        S[i] = 0.0
+        for j in 1:rmax[]
+            wj = get_w(ϕ1[i], s[], j)
+            S[i] += wj * kernel_cdf(m, y1[i], j)
+        end
+    end
+end
+
+function sample!(m::DGPMErlang; mcmcsize = 4000, burnin = 2000, thin = 1)
+    (; S, skl) = m
+    (; N1, D1, f, β) = skl
+    chainf = [zeros(N1) for _ in 1:(mcmcsize - burnin) ÷ thin]
+    chainS = [zeros(N1) for _ in 1:(mcmcsize - burnin) ÷ thin]
+    chainβ = [zeros(D1) for _ in 1:(mcmcsize - burnin) ÷ thin]
+    chaing = [zeros(Bool, D1) for _ in 1:(mcmcsize - burnin) ÷ thin]
+    for iter in 1:mcmcsize
+        step!(m)
+        update_S!(m)
+        if iter > burnin && iszero((iter - burnin) % thin)
+            chainf[(iter - burnin) ÷ thin] .= f
+            chainS[(iter - burnin) ÷ thin] .= S
+            chainβ[(iter - burnin) ÷ thin] .= β
+            chaing[(iter - burnin) ÷ thin] .= (β .!= 0.0)
+        end
+    end
+    return chainf, chainS, chainβ, chaing
 end

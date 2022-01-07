@@ -1,10 +1,13 @@
 using Revise
 
 using BNPRegressionGGA2021
+using CSV
 using DataStructures
+using DataFrames
 using Distributions
 using Gadfly
 using Random
+using Statistics
 
 const BNP = BNPRegressionGGA2021
 
@@ -27,9 +30,8 @@ Random.seed!(1);
 N0, N1 = 500, 50;
 dy, z0, c0, y0, X0, y1, X1 = simulate_sample(N0, N1);
 
-
 m = BNP.DGPMErlang(; c0, y0, X0, y1, X1);
-chainf, chainβ = BNP.sample!(m; mcmcsize = 2000, burnin = 1000);
+chainf, chainS, chainβ, chaing = BNP.sample!(m; mcmcsize = 2000, burnin = 1000);
 plot(
     layer(x = y1, y = mean(chainf), Geom.line, color=["bnp"]), 
     layer(x = y1, y = pdf.(dy, y1), Geom.line, color=["true"]),
@@ -117,6 +119,14 @@ end
 Random.seed!(1);
 N0, N1 = 500, 50;
 dy1, dy2, z0, c0, y0, X0, y1, X1 = simulate_sample(N0, N1);
+
+# Save the data for replication purposes
+data = DataFrame(X0, :auto)
+data[!, :c0] = c0
+data[!, :y0] = y0
+CSV.write("data/example_survival.csv", data)
+
+# Plot the true density / survival / hazard functions
 ygrid = LinRange(0, 6, N1) |> collect;
 plot(
     layer(x = ygrid, y = pdf.(dy2, ygrid), Geom.line, color=["pdf2"]),
@@ -163,13 +173,40 @@ plot(
 )
 
 m = BNP.DGPMErlang(; c0, y0, X0, y1, X1);
-chainf, chainβ, chaing = BNP.sample!(m; mcmcsize = 200000, burnin = 100000, thin = 10);
-plot(x = y1, y = mean(chainf), color = Symbol.(X1[:, end]), Geom.line)
-plot(x = z0, color = string.(X0[:, end]), Geom.density)
-a = mean(chaing)
-mean(m.event)
+chainf, chainS, chainβ, chaing = BNP.sample!(m; mcmcsize = 20000, burnin = 10000);
+
+# Show the marginal "significance" of each variable
+mean(chaing)
+
+# Generate a dataframe for plotting the posterior survival curves
+chainS_mat = hcat(chainS...) 
+chainS_v = [chainS_mat[i, :] for i in 1:size(chainS_mat, 1)]
+plot_data = DataFrame(
+    z = y1,
+    x5 = X1[:, end], 
+    St = [1 - cdf(X1[i, end] == 1 ? dy2 : dy1, y1[i]) for i in 1:size(X1, 1)],
+    Sh = mean.(chainS_v),
+    lb = quantile.(chainS_v, 0.025),
+    ub = quantile.(chainS_v, 0.975),
+
+)
+CSV.write("data/crossing-survival-curves-fitted.csv", plot_data)
+
+
+# plot(
+#     plot(x = y1, y = mean.(chainS_v), color = Symbol.(X1[:, end]), Geom.line)
+#     plot(x = y1, y = quantile.(chainS_v, 0.05), color = Symbol.(X1[:, end]), Geom.line)
+#     plot(x = y1, y = quantile.(chainS_v, 0.95), color = Symbol.(X1[:, end]), Geom.line)    
+# )
+# plot(x = y1, y = mean.(chainS_v), color = Symbol.(X1[:, end]), Geom.line)
+# plot(x = y1, y = quantile.(chainS_v, 0.05), color = Symbol.(X1[:, end]), Geom.line)
+# plot(x = y1, y = quantile.(chainS_v, 0.95), color = Symbol.(X1[:, end]), Geom.line)
+# plot(x = z0, color = string.(X0[:, end]), Geom.density)
+# a = mean(chaing)
+# mean(m.event)
 most_common_γ = 
     chaing |>
     DataStructures.counter |>
     collect |>
     x -> sort(x, by = x -> x[2], rev = true)
+

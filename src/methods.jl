@@ -15,12 +15,12 @@ function sample!(m::AbstractModel; mcmcsize = 4000, burnin = 2000, thin = 1)
 end
 
 function step!(m::AbstractModel)
-    update_atoms!(m) # see interface.jl
     update_f!(m)
     update_d!(m)
     update_r!(m)
     update_n!(m)
     update_β!(m)
+    update_atoms!(m) # see interface.jl
 end
 
 function update_f!(m::AbstractModel)
@@ -53,12 +53,28 @@ function update_d!(m::AbstractModel)
         yi = y0[i]
         resize!(p, r[i])
         for j in 1:r[i]
-            p[j] = kernel_pdf(m, yi, j)
+            p[j] = eps() + kernel_pdf(m, yi, j)
         end
         p ./= sum(p)
-        d[i] = rand(Categorical(p))
+        try 
+            d[i] = rand(Categorical(p))
+        catch
+            p
+        end
     end
     return nothing
+    # (; N0, y0, d, r) = skeleton(m)
+    # for i in 1:N0
+    #     yi = y0[i]
+    #     newd = 0
+    #     maxc = -Inf
+    #     for j in 1:r[i]
+    #         newc = kernel_pdf(m, yi, j) - log(-log(rand()))
+    #         newc > maxc && (maxc = newc; newd = j)
+    #     end
+    #     d[i] = newd
+    # end
+    return nothing    
 end
 
 function update_r!(m::AbstractModel)

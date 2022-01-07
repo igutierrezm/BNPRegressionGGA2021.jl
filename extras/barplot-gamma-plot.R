@@ -16,26 +16,32 @@ names(df) <- paste0("V", 1:6)
 counts <- 
     df |> 
     purrr::map_df(as.integer) |>
-    dplyr::count(V1, V2, V3, V4, V5, V6) |>
+    dplyr::count(V2, V3, V4, V5, V6) |>
     dplyr::arrange(desc(n)) |>
     dplyr::mutate(
         frac = n / sum(n),
         frac_cumsum = cumsum(frac),
-        gamma = paste0(V1, V2, V3, V4, V5, V6)
+        gamma = paste0("(", paste(V2, V3, V4, V5, V6, sep = ","), ")")
     ) |>
-    dplyr::filter(frac_cumsum <= 0.8) |>
+    dplyr::filter(frac_cumsum <= 0.9) |>
     dplyr::select(gamma, frac)
+
+# Add a remainer
+counts <-
+    counts |>
+    dplyr::add_row(gamma = "others", frac = 1 - sum(counts$frac))
 
 # Create the plot
 p <- 
     counts |>
-    ggplot(aes(x = reorder(gamma, frac), y = frac)) + 
+    ggplot(aes(x = reorder(gamma, frac - (gamma == "others")), y = frac)) + 
     geom_bar(stat = "identity") +
+    geom_text(aes(label = frac), hjust = -0.1) +
     coord_flip() + 
     theme_classic() +
-    labs(x = "$\\gamma$ (as a string of 0/1 values)", y = "relative frequency")
+    labs(x = "$\\gamma$", y = "relative frequency")
 p
 
 # Save the plot in svg format
-"crossing-survival-curves-fit.svg" |>
-    ggsave(plot = p, width = 5 * 8 / 9, height = 3 * 4 / 5)
+"barplot-gamma.svg" |>
+    ggsave(plot = p, width = 5 * 8 / 9, height = 3)

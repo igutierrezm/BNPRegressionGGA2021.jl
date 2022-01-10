@@ -43,5 +43,5 @@ p <-
 p
 
 # Save the plot in svg format
-"barplot-gamma.svg" |>
+"barplot-gamma-bnp.svg" |>
     ggsave(plot = p, width = 5 * 8 / 9, height = 3)

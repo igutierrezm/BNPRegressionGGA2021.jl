@@ -45,3 +45,17 @@ for iter in 1:Niter
 end
 
 CSV.write("data/barplot-gamma.csv", DataFrame(df, :auto))
+
+#========================================================#
+# Repeat the experiment, but save the input samples only #
+#========================================================#
+
+Random.seed!(1);
+N0, N1, Niter = 500, 2, 100;
+for iter in 1:Niter
+    dy1, dy2, z0, c0, y0, X0, y1, X1 = simulate_sample(N0, N1);
+    df = DataFrame(X0, :auto)
+    df[!, :z0] = z0
+    df[!, :c0] = c0
+    CSV.write("data/barplot-gamma-input-data-$iter.csv", df)
+end

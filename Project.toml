@@ -23,6 +23,7 @@ BSplines = "0.3"
 Distributions = "0.25"
 HypergeometricFunctions = "0.3"
 SpecialFunctions = "1, 2"
+Walker2020Sampling = "0.1"
 julia = "1.7"
 
 [extras]

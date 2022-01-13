@@ -4,3 +4,5 @@
 /docs/build/
 /data/barplot-*
 /data/simulation-*
+/data/map-gamma-*
+/figures/*

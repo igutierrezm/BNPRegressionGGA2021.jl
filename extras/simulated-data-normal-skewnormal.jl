@@ -2,7 +2,7 @@ using Revise
 using CSV
 using DataFrames
 using Distributions
-using Gadfly
+using LinearAlgebra
 using Random
 
 # Define the DGP

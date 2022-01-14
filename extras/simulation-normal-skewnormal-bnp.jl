@@ -12,7 +12,9 @@ const BNP = BNPRegressionGGA2021
 # Define the DGP
 function simulate_sample(N0, N1)
     X0 = [ones(N0) rand([0, 1], N0, 5)]
-    X1 = kron([ones(2, 5) [1, 0]], ones(N1))
+    # X1 = kron([ones(2, 5) [1, 0]], ones(N1, 1))
+    
+    X1 = rand(2, 5), rand(2, 4)
     α = 4
     δ = α / √(1 + α^2)
     ω = 1

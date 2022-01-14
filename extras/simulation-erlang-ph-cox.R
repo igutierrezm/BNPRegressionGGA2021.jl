@@ -57,7 +57,7 @@ results <-
 # Save the results
 rownames(results) <- NULL
 names(results) <- paste0("x", 1:5)
-write.csv(results, "data/simulation-example-erlang-proportional-gamma-cox.csv")
+write.csv(results, "data/simulation-erlang-ph-gamma-cox.csv")
 
 # a <- |>
 #     dplyr::count(V1, V2, V3, V4, V5, sort = TRUE) |> 

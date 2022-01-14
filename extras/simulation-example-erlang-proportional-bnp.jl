@@ -26,6 +26,7 @@ N0, N1, Niter = 500, 2, 1;
 df = zeros(Bool, Niter, 6);
 Random.seed!(1);
 dy1, dy2, z0, c0, y0, X0, y1, X1 = simulate_sample(N0, N1);
+mean(y0 .> c0)
 grid = LinRange(0, 6, 50) |> collect;
 plot(
     layer(x = grid, y = 1 .- cdf.(dy1, grid), Geom.line()),
@@ -59,7 +60,7 @@ begin
         println(iter)
         println(df[iter, :])
     end
-    CSV.write("data/simulation-example-erlang-proportional-gamma.csv", DataFrame(df, :auto))
+    CSV.write("data/simulation-example-erlang-proportional-gamma-bnp.csv", DataFrame(df, :auto))
 end
 
 # Save the 100 simulated samples

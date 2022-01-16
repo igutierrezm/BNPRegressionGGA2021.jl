@@ -6,7 +6,7 @@ using Random
 const BNP = BNPRegressionGGA2021
 
 # Get the simulated data
-data = CSV.read("data/simulated-data-erlang-ph.csv", DataFrame)
+data = CSV.read("data/simulated-data-erlang-nph.csv", DataFrame)
 
 # Get the best γ for 100 simulated samples (using the MAP estimator)
 begin
@@ -32,6 +32,6 @@ begin
         end
         println(iter)
     end
-    filename = "data/simulated-best-gamma-erlang-ph-bnp.csv"
+    filename = "data/simulated-best-gamma-erlang-nph-bnp.csv"
     CSV.write(filename, DataFrame(df, :auto))
 end

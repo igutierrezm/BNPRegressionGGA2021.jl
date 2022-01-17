@@ -4,8 +4,8 @@ using Random
 
 # Define the DGP
 function simulate_sample(N0, N1)
-    dy1 = MixtureModel([Beta(5, 2), Beta(2, 5)], [0.5, 0.5]);
-    dy2 = MixtureModel([Beta(4, 2), Beta(2, 4)], [0.5, 0.5]);
+    dy1 = MixtureModel([Beta(5, 2), Beta(2, 5)], [0.7, 0.3]);
+    dy2 = MixtureModel([Beta(5, 2), Beta(2, 5)], [0.3, 0.7]);
     X0 = [ones(N0) rand([0, 1], N0, 5)]
     X1 = kron([ones(2, 5) [1, 0]], ones(N1))
     y0 = [X0[i, end] == 1 ? rand(dy2) : rand(dy1) for i in 1:N0]

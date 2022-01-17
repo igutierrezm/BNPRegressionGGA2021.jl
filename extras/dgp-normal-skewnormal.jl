@@ -11,7 +11,7 @@ function simulate_sample(N0, N1)
     ω = 1
     ξ = - ω * δ * √(2 / π)
     ϵ = √(1 - δ^2) .* randn(N0) + δ .* abs.(randn(N0)) .+ ξ
-    y0 = 0.8 * X0[:, end] + ϵ
+    y0 = 0.3 * X0[:, end] + ϵ
     y1 = LinRange(-3, 3, N1) |> collect |> x -> repeat(x, 2)
     return y0, X0, y1, X1
 end

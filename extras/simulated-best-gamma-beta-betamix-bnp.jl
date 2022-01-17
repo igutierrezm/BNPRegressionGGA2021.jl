@@ -34,4 +34,3 @@ begin
     filename = "data/simulated-best-gamma-beta-betamix-bnp.csv"
     CSV.write(filename, DataFrame(df, :auto))
 end
-df

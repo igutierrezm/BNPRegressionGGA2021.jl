@@ -42,10 +42,13 @@ results <-
         ) |>
     dplyr::group_by(iter) |>
     dplyr::group_map(~ get_best_gamma(.x)) |>
-    purrr::reduce(rbind)
+    purrr::reduce(rbind) |>
+    as.data.frame()
 
 # Save the results
-write.csv(results, "data/simulated-best-gamma-beta-beta-freq.csv")
+rownames(results) <- NULL
+colnames(results) <- paste0("x", 2:6)
+write.csv(results, "data/simulated-best-gamma-beta-beta-freq.csv", row.names = FALSE)
 
 # a <- |>
 #     dplyr::count(V1, V2, V3, V4, V5, sort = TRUE) |> 

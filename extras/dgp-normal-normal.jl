@@ -5,7 +5,7 @@ using Random
 # Define the DGP
 function simulate_sample(N0, N1)
     dy1 = Normal(0, 1);
-    dy2 = Normal(0.5, 1);
+    dy2 = Normal(0.3, 1);
     X0 = [ones(N0) rand([0, 1], N0, 5)]
     X1 = kron([ones(2, 5) [1, 0]], ones(N1))
     y0 = [X0[i, end] == 1 ? rand(dy2) : rand(dy1) for i in 1:N0]

@@ -13,10 +13,11 @@ function simulate_sample(N0, N1)
     ϵ = √(1 - δ^2) .* randn(N0) + δ .* abs.(randn(N0)) .+ ξ
     y0 = 0.3 * X0[:, end] + ϵ
     y1 = LinRange(-3, 3, N1) |> collect |> x -> repeat(x, 2)
-    return y0, X0, y1, X1
+    return y0, X0, y1, X1, ϵ
 end
 
 # # Not run
 # Random.seed!(1);
 # N0, N1 = 500, 0;
-# y0, X0, y1, X1 = simulate_sample(N0, N1);
+# y0, X0, y1, X1, ϵ = simulate_sample(N0, N1);
+# mean(ϵ)

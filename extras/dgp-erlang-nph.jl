@@ -19,3 +19,4 @@ end
 # Random.seed!(1);
 # N0, N1 = 500, 0;
 # dy1, dy2, z0, c0, y0, X0, y1, X1 = simulate_sample(N0, N1);
+# mean(z0 .> c0)

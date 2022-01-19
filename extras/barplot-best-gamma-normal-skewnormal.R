@@ -1,3 +1,4 @@
+library(dplyr)
 library(ggplot2)
 
 # Get the frequentist results
@@ -26,7 +27,7 @@ best_gamma_ranking <-
         frac = n / 100,
         gamma = paste0("(", paste(x2, x3, x4, x5, x6, sep = ","), ")")
     ) |> 
-    group_by(method) |>
+    dplyr::group_by(method) |>
     dplyr::slice(1:5)
 
 # Get the plot

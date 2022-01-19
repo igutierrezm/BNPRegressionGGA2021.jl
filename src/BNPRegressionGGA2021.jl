@@ -28,4 +28,3 @@ include("dgpmerlang.jl")
 include("dgpmbeta.jl")
 
 end
-

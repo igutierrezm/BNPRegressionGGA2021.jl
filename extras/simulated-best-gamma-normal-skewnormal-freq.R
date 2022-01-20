@@ -36,9 +36,6 @@ results <-
     "data/simulated-data-normal-skewnormal.csv" |>
     readr::read_csv() |>
     dplyr::select(-x1) |> 
-        dplyr::mutate(
-            dplyr::across(dplyr::starts_with("x"), as.factor)
-        ) |>
     dplyr::group_by(iter) |>
     dplyr::group_map(~ get_best_gamma(.x)) |>
     purrr::reduce(rbind) |>
@@ -48,16 +45,3 @@ results <-
 rownames(results) <- NULL
 colnames(results) <- paste0("x", 2:6)
 write.csv(results, "data/simulated-best-gamma-normal-skewnormal-freq.csv", row.names = FALSE)
-
-#     as.data.frame() |>
-#     dplyr::count(V1, V2, V3, V4, V5, sort = TRUE) |> 
-#     dplyr::arrange(desc(n)) |> 
-#     dplyr::mutate(
-#         frac = n / 100,
-#         gamma = paste0("(", paste(V1, V2, V3, V4, V5, sep = ","), ")")
-#     ) |> 
-#     dplyr::ungroup() |>
-#     dplyr::select(-dplyr::starts_with("V"), n)
-
-# # Save the results
-# write.csv(results, "data/simulated-best-gamma-normal-normal-freq.csv")

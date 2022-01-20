@@ -36,10 +36,7 @@ get_best_gamma <- function(data) {
 results <-
     "data/simulated-data-beta-beta.csv" |>
     readr::read_csv() |>
-    dplyr::select(-x1) |> 
-        dplyr::mutate(
-            dplyr::across(dplyr::starts_with("x"), as.factor)
-        ) |>
+    dplyr::select(-x1) |>
     dplyr::group_by(iter) |>
     dplyr::group_map(~ get_best_gamma(.x)) |>
     purrr::reduce(rbind) |>

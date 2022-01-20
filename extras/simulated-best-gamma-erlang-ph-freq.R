@@ -37,10 +37,9 @@ results <-
     "data/simulated-data-erlang-ph.csv" |>
     readr::read_csv() |>
     dplyr::select(-x1) |> 
-        dplyr::mutate(
-            dplyr::across(dplyr::starts_with("x"), as.factor),
-            time = Surv(time = pmin(y0, c0), event = y0 < c0)
-        ) |>
+    dplyr::mutate(
+        time = Surv(time = pmin(y0, c0), event = y0 < c0)
+    ) |>
     dplyr::group_by(iter) |>
     dplyr::group_map(~ get_best_gamma(.x)) |>
     purrr::reduce(rbind) |>
@@ -136,3 +135,4 @@ write.csv(results, "data/simulated-best-gamma-erlang-ph-freq.csv", row.names = F
     #     ) |>
     #     dplyr::select(-c(x1, c0)) |>
     #     dplyr::rename_with(toupper, starts_with("x"))
+

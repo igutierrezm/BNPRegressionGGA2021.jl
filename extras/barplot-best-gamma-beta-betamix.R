@@ -1,4 +1,5 @@
 library(dplyr)
+library(forcats)
 library(ggplot2)
 
 # Get the frequentist results
@@ -25,10 +26,13 @@ best_gamma_ranking <-
     dplyr::count(method, x2, x3, x4, x5, x6, sort = TRUE) |>
     dplyr::mutate(
         frac = n / 100,
+        method = factor(method),
         gamma = paste0("(", paste(x2, x3, x4, x5, x6, sep = ","), ")")
     ) |> 
     dplyr::group_by(method) |>
-    dplyr::slice(1:5)
+    dplyr::slice(1:5) |>
+    dplyr::ungroup() |>
+    dplyr::mutate(gamma = paste0(strrep(" ", as.numeric(method) - 1), gamma))
 
 # Get the plot
 p <- 
@@ -36,7 +40,7 @@ p <-
     ggplot2::ggplot(aes(x = reorder(gamma, frac), y = frac)) + 
     ggplot2::geom_bar(stat = "identity") +
     ggplot2::facet_wrap(vars(method), scales = "free_y", nrow = 2) +
-    geom_text(aes(label = frac), hjust = -0.1) +
+    geom_text(aes(label = sprintf("%1.2f", frac)), hjust = -0.1) +
     ylim(0, 1) +
     coord_flip() + 
     theme_classic() +

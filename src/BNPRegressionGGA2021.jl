@@ -23,7 +23,7 @@ include("interface.jl")
 include("methods.jl")
 
 # The specific models are implemented here:
-include("dgpmnormal.jl")
+include("dgsbpnormal.jl")
 include("dgpmerlang.jl")
 include("dgpmbeta.jl")
 

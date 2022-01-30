@@ -19,7 +19,7 @@ begin
         X0 = gdata[iter][!, r"x"] |> Matrix
         y1 = zeros(0)
         X1 = zeros(0, size(X0, 2))
-        m = BNP.DGPMNormal(; y0, X0, y1, X1);
+        m = BNP.DGSBPNormal(; y0, X0, y1, X1);
         _, _, chaing = BNP.sample!(m; mcmcsize = 10000, burnin = 5000);
         df[iter, :] .= begin
             chaing |>

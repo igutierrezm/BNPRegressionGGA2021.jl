@@ -1,34 +1,29 @@
-Base.@kwdef struct DGPMNormal <: AbstractModel
-    # Data
-    y0::Vector{Float64}
-    X0::Matrix{Float64}
-    y1::Vector{Float64}
-    X1::Matrix{Float64}
+Base.@kwdef struct DGSBPNormal <: AbstractModel
+    # Skeleton
+    skl::Skeleton
     # Hyperparameters
     m_μ0::Float64 = 0.0
     c_μ0::Float64 = 1.0
     a_τ0::Float64 = 1.0
     b_τ0::Float64 = 1.0
     # Parameters
-    μ::Vector{Float64} = zeros(1)
-    τ::Vector{Float64} = ones(1)
+    τ::Vector{Float64} = ones(rmax(skl))
+    μ::Vector{Float64} = zeros(rmax(skl))
     # Transformed parameters
-    ȳ::Vector{Float64} = zeros(1)
-    v::Vector{Float64} = zeros(1)
-    # Skeleton
-    skl::Skeleton = Skeleton(; y0, y1, X0, X1)
+    ȳ::Vector{Float64} = zeros(rmax(skl))
+    v::Vector{Float64} = zeros(rmax(skl))
 end
 
-function skeleton(m::DGPMNormal)
+function skeleton(m::DGSBPNormal)
     return m.skl
 end
 
-function kernel_pdf(m::DGPMNormal, yi::Float64, j::Int)
+function kernel_pdf(m::DGSBPNormal, yi::Float64, j::Int)
     kernel = Normal(m.μ[j], 1 / √m.τ[j])
     return pdf(kernel, yi)
 end
 
-function update_atoms!(m::DGPMNormal)
+function update_atoms!(m::DGSBPNormal)
     (; m_μ0, c_μ0, a_τ0, b_τ0, μ, τ, ȳ, v, skl) = m
     update_suffstats!(m)
     n = cluster_sizes(skl)
@@ -49,8 +44,9 @@ function update_atoms!(m::DGPMNormal)
     return nothing
 end
 
-function update_suffstats!(m::DGPMNormal)
-    (; y0, ȳ, v, skl) = m
+function update_suffstats!(m::DGSBPNormal)
+    (; ȳ, v, skl) = m
+    (; y0) = skl
     d = cluster_labels(skl)
     n = cluster_sizes(skl)
     y = y0

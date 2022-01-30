@@ -30,7 +30,7 @@ df = zeros(Bool, Niter, 6);
 Random.seed!(1);
 y0, X0, y1, X1 = simulate_sample(N0, N1);
 plot(x = y0, Geom.density())
-m = BNP.DGPMNormal(; y0, X0, y1, X1);
+m = BNP.DGSBPNormal(; y0, X0, y1, X1);
 _, _, chaing = BNP.sample!(m; mcmcsize = 10000, burnin = 5000);
 mean(chaing)
 
@@ -41,7 +41,7 @@ begin
     Random.seed!(1);
     for iter in 1:Niter
         y0, X0, y1, X1 = simulate_sample(N0, N1);
-        m = BNP.DGPMNormal(; y0, X0, y1, X1);
+        m = BNP.DGSBPNormal(; y0, X0, y1, X1);
         _, _, chaing = BNP.sample!(m; mcmcsize = 10000, burnin = 5000);
         df[iter, :] .= begin
             chaing |>

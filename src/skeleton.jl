@@ -23,9 +23,17 @@ Base.@kwdef struct Skeleton
     rmax::Base.RefValue{Int} = Ref(maximum(r))
     ϕ0::Vector{Float64} = ones(N0) / 2
     ϕ1::Vector{Float64} = ones(N1) / 2
-    f::Vector{Float64} = ones(N1)
+    f::Vector{Float64} = zeros(N1)
 end
 
-rmax(s::Skeleton) = s.rmax[]
-cluster_sizes(s::Skeleton) = s.n
-cluster_labels(s::Skeleton) = s.d
+ygrid(skl::Skeleton) = skl.y1
+Xgrid(skl::Skeleton) = skl.X1
+Ngrid(skl::Skeleton) = skl.N1
+y(skl::Skeleton) = skl.y0
+X(skl::Skeleton) = skl.X0
+N(skl::Skeleton) = skl.N0
+n(skl::Skeleton) = skl.n
+d(skl::Skeleton) = skl.d
+r(skl::Skeleton) = skl.r
+f(skl::Skeleton) = skl.f
+rmax(skl::Skeleton) = skl.rmax[]

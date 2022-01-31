@@ -5,6 +5,7 @@ Base.@kwdef struct DGSBPNormal <: AbstractModel
     y1::Vector{Float64}
     X1::Matrix{Float64}
     mapping::Vector{Vector{Int}} = [[i] for i in 1:size(X0, 2)]
+    update_γ::Bool = true
     # Hyperparameters
     m_μ0::Float64 = 0.0
     c_μ0::Float64 = 1.0
@@ -17,7 +18,7 @@ Base.@kwdef struct DGSBPNormal <: AbstractModel
     ȳ::Vector{Float64} = zeros(1)
     v::Vector{Float64} = zeros(1)
     # Skeleton
-    skl::Skeleton = Skeleton(; y0, y1, X0, X1, mapping)
+    skl::Skeleton = Skeleton(; y0, y1, X0, X1, mapping, update_γ)
 end
 
 function skeleton(m::DGSBPNormal)

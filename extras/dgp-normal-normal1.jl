@@ -35,7 +35,7 @@ using RCall
 function simulate_sample(N0, N1)
     # Set the conditional density
     function dy(xc) 
-        atoms = [(-xc, 0.8), (xc, 0.8)]
+        atoms = [(-xc, 0.2), (xc, 0.2)]
         weights = [0.5, 0.5]
         # weights = [exp(-2xc), 1 - exp(-2xc)]
         MixtureModel(Normal, atoms, weights)
@@ -47,7 +47,7 @@ function simulate_sample(N0, N1)
 
     # Generate the grid points
     y_grid = LinRange(-3.0, 3.0, N1)
-    x_grid = [0.1, 0.25, 0.48, 0.76, 0.88]
+    x_grid = [0.25, 0.5, 0.75]
     y1, x1 = Iterators.product(y_grid, x_grid) |> x -> zip(x...) .|> collect
     X1 = rcopy(R"cbind(1, predict(splines::bs($x0, df = 6, Boundary.knots = c(0, 1)), $x1))")
     return dy, y0, x0, X0, y1, x1, X1

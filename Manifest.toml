@@ -14,7 +14,7 @@ uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
 [[deps.BayesNegativeBinomial]]
 deps = ["Distributions", "LinearAlgebra", "PolyaGammaSamplers", "Random"]
-git-tree-sha1 = "b24509081f3ee7703d8f1e6f4118d5ce0168d81b"
+git-tree-sha1 = "0e768f947d43e1b0885c0818f5665b341b5554ac"
 repo-rev = "master"
 repo-url = "https://github.com/igutierrezm/BayesNegativeBinomial.jl"
 uuid = "bfffd7ee-3ae3-4322-8549-de099c477cdc"

@@ -5,6 +5,7 @@ Base.@kwdef struct Skeleton
     y1::Vector{Float64}
     X1::Matrix{Float64}
     mapping::Vector{Vector{Int}} = [[i] for i in 1:size(X0, 2)]
+    update_γ::Bool = true
     # Transformed data
     N0::Int = size(X0, 1)
     N1::Int = size(X1, 1)
@@ -14,7 +15,7 @@ Base.@kwdef struct Skeleton
     m0β::Vector{Float64} = zeros(D0)
     Σ0β::Matrix{Float64} = 2 * I(D0)
     # Parameters
-    rmodel::BNB.Sampler = BNB.Sampler(ones(Int, N0), X0; mapping)
+    rmodel::BNB.Sampler = BNB.Sampler(ones(Int, N0), X0; mapping, update_γ)
     r::Vector{Int} = ones(Int, N0)
     d::Vector{Int} = ones(Int, N0)
     β::Vector{Float64} = rmodel.β

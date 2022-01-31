@@ -3,7 +3,7 @@ using DataFrames
 using Random
 
 # Load simulate_sample(N0, N1):
-include("../extras/dgp-normal-normal.jl");
+include("dgp-normal-normal.jl");
 
 # Save 100 simulated samples
 begin

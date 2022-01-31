@@ -1,17 +1,23 @@
 Base.@kwdef struct DGSBPNormal <: AbstractModel
-    # Skeleton
-    skl::Skeleton
+    # Data
+    y0::Vector{Float64}
+    X0::Matrix{Float64}
+    y1::Vector{Float64}
+    X1::Matrix{Float64}
+    mapping::Vector{Vector{Int}} = [[i] for i in 1:size(X0, 2)]
     # Hyperparameters
     m_μ0::Float64 = 0.0
     c_μ0::Float64 = 1.0
     a_τ0::Float64 = 1.0
     b_τ0::Float64 = 1.0
     # Parameters
-    τ::Vector{Float64} = ones(rmax(skl))
-    μ::Vector{Float64} = zeros(rmax(skl))
+    μ::Vector{Float64} = zeros(1)
+    τ::Vector{Float64} = ones(1)
     # Transformed parameters
-    ȳ::Vector{Float64} = zeros(rmax(skl))
-    v::Vector{Float64} = zeros(rmax(skl))
+    ȳ::Vector{Float64} = zeros(1)
+    v::Vector{Float64} = zeros(1)
+    # Skeleton
+    skl::Skeleton = Skeleton(; y0, y1, X0, X1, mapping)
 end
 
 function skeleton(m::DGSBPNormal)
@@ -45,8 +51,7 @@ function update_atoms!(m::DGSBPNormal)
 end
 
 function update_suffstats!(m::DGSBPNormal)
-    (; ȳ, v, skl) = m
-    (; y0) = skl
+    (; y0, ȳ, v, skl) = m
     d = cluster_labels(skl)
     n = cluster_sizes(skl)
     y = y0

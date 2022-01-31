@@ -4,6 +4,7 @@ Base.@kwdef struct Skeleton
     X0::Matrix{Float64}
     y1::Vector{Float64}
     X1::Matrix{Float64}
+    mapping::Vector{Vector{Int}} = [[i] for i in 1:size(X0, 2)]
     # Transformed data
     N0::Int = size(X0, 1)
     N1::Int = size(X1, 1)
@@ -13,7 +14,7 @@ Base.@kwdef struct Skeleton
     m0β::Vector{Float64} = zeros(D0)
     Σ0β::Matrix{Float64} = 2 * I(D0)
     # Parameters
-    rmodel::BNB.Sampler = BNB.Sampler(ones(Int, N0), X0)
+    rmodel::BNB.Sampler = BNB.Sampler(ones(Int, N0), X0; mapping)
     r::Vector{Int} = ones(Int, N0)
     d::Vector{Int} = ones(Int, N0)
     β::Vector{Float64} = rmodel.β
@@ -32,8 +33,8 @@ Ngrid(skl::Skeleton) = skl.N1
 y(skl::Skeleton) = skl.y0
 X(skl::Skeleton) = skl.X0
 N(skl::Skeleton) = skl.N0
-n(skl::Skeleton) = skl.n
-d(skl::Skeleton) = skl.d
+cluster_sizes(skl::Skeleton) = skl.n
+cluster_labels(skl::Skeleton) = skl.d
 r(skl::Skeleton) = skl.r
 f(skl::Skeleton) = skl.f
 rmax(skl::Skeleton) = skl.rmax[]

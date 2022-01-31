@@ -56,7 +56,7 @@ plot(
 function simulate_sample_01(rng, N0, N1)
     dy1 = LogNormal(0, 0.5)
     dy2 = MixtureModel(LogNormal, [(0.0, 1.0), (1.0, 0.25)], [0.6, 0.4]);
-    X0 = [ones(N0) rand(rng, [1, 2], N0)]
+    x0 = [ones(N0) rand(rng, [1, 2], N0)
     X1 = kron(ones(N1), [1 1; 1 2])
     z0 = [X0[i, 2] == 2 ? rand(rng, dy2) : rand(rng, dy1) for i in 1:N0]
     y1 = LinRange(0, 6, N1) |> collect  |> x -> repeat(x, 2)

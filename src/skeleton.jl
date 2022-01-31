@@ -4,8 +4,8 @@ Base.@kwdef struct Skeleton
     X0::Matrix{Float64}
     y1::Vector{Float64}
     X1::Matrix{Float64}
-    mapping::Vector{Vector{Int}} = [[i] for i in 1:size(X0, 2)]
     update_γ::Bool = true
+    mapping::Vector{Vector{Int}} = [[i] for i in 1:size(X0, 2)]
     # Transformed data
     N0::Int = size(X0, 1)
     N1::Int = size(X1, 1)

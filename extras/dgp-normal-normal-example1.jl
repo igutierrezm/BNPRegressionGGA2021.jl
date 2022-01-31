@@ -8,11 +8,18 @@ const BNP = BNPRegressionGGA2021
 begin
     include("dgp-normal-normal1.jl");
     Random.seed!(1);
-    N0, N1 = 10000, 50;
+    N0, N1 = 6000, 50;
     dy, y0, x0, X0, y1, x1, X1 = simulate_sample(N0, N1);
     m0, o0 = mean(y0), std(y0)
     y0 = (y0 .- m0) ./ o0
-end;
+end; 
+# did not work with 1000
+# did not work with 2000
+# did not work with 3000
+# did not work with 4000
+# worked better with 5000
+# worked better with 6000
+# worked with 10000
 
 # Fit the model
 begin
@@ -20,7 +27,7 @@ begin
     mapping = [[1], collect(2:size(X0, 2))];
     m = BNP.DGSBPNormal(; y0, X0, y1, X1, mapping, update_γ);
     chainf, chainβ, chaing = BNP.sample!(m; mcmcsize = 20000, burnin = 10000);
-end;
+end; 
 
 # Save the results as a CSV file
 begin

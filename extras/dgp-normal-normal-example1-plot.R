@@ -13,7 +13,13 @@ df <-
 head(df)
 
 # Plot the conditional posterior predictive densities
-df |> 
+p <- 
+    df |> 
     ggplot2::ggplot(ggplot2::aes(x = y, y = value, color = name)) + 
     ggplot2::facet_grid(row = ggplot2::vars(x)) +
     ggplot2::geom_line()
+p
+
+# Save the plot in svg format
+"figures/dgp-normal-normal-example1-500.pdf" |>
+    ggsave(plot = p, width = 5 * 8 / 9, height = 3)

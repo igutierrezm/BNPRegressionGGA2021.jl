@@ -8,7 +8,7 @@ const BNP = BNPRegressionGGA2021
 begin
     include("dgp-normal-normal1.jl");
     Random.seed!(1);
-    N0, N1 = 6000, 50;
+    N0, N1 = 500, 50;
     dy, y0, x0, X0, y1, x1, X1 = simulate_sample(N0, N1);
     m0, o0 = mean(y0), std(y0)
     y0 = (y0 .- m0) ./ o0

@@ -37,13 +37,14 @@ function update_f!(m::AbstractModel)
 end
 
 function get_w(θ0, s0, j)
-    exp(
-        - log(j) +
-        logabsbinomial(j + s0 - 2, j - 1)[1] +
-        s0 * log(θ0) +
-        (j - 1) * log(1 - θ0) +
-        log(_₂F₁(BigFloat(j + s0 - 1), 1, j + 1, 1 - θ0))
-    )
+    # exp(
+    #     - log(j) +
+    #     logabsbinomial(j + s0 - 2, j - 1)[1] +
+    #     s0 * log(θ0) +
+    #     (j - 1) * log(1 - θ0) +
+    #     log(_₂F₁(BigFloat(j + s0 - 1), 1, j + 1, 1 - θ0))
+    # )
+    return θ0 * (1 - θ0)^(j - 1)
 end
 
 function update_d!(m::AbstractModel)

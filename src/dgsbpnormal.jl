@@ -8,7 +8,7 @@ Base.@kwdef struct DGSBPNormal <: AbstractModel
     update_γ::Bool = true
     # Hyperparameters
     m_μ0::Float64 = 0.0
-    c_μ0::Float64 = 5.0
+    c_μ0::Float64 = 1.0
     a_τ0::Float64 = 0.1
     b_τ0::Float64 = 0.1
     # Parameters

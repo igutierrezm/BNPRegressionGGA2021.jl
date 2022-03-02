@@ -14,9 +14,7 @@ end;
 # Define the DGP
 function simulate_sample(N0, N1)
     # Set the conditional density
-    function dy(xc) 
-        Normal(xc^3, 0.5)
-    end
+    dy(xc) = Normal(0.2 * xc^3, 0.5)
     
     # Simulate a sample
     x0 = collect(LinRange(-3, 3, N0))
@@ -40,10 +38,9 @@ end;
 
 # Fit the model 
 begin
-    update_γ = false;
     mapping = [[1], collect(2:size(X0, 2))];
-    m = BNP.DGSBPNormal(; y0, X0, y1, X1, mapping, update_γ);
-    chainf, chainβ, chaing = BNP.sample!(m; mcmcsize = 20000, burnin = 10000);
+    m = BNP.DGSBPNormal(; y0, X0, y1, X1, mapping, update_γ = false);
+    chainf, chainβ, chaing = BNP.sample!(m; mcmcsize = 4000);
 end; 
 
 # Collect the estimated densities
@@ -51,3 +48,23 @@ df = DataFrame(y = y1, x = x1, fh = mean(chainf), f0 = pdf.(dy.(x1), y1))
 
 # Save the results
 CSV.write("data/walker-example.csv", df)
+
+# Create a plot
+R"""
+# Munge the data
+df <- 
+    readr::read_csv("data/walker-example.csv") |>
+    dplyr::mutate(x = factor(x)) |>
+    tidyr::pivot_longer(c(fh, f0))
+
+# Plot the conditional posterior predictive densities
+p <- 
+    df |> 
+    ggplot2::ggplot(ggplot2::aes(x = y, y = value, color = name)) + 
+    ggplot2::facet_grid(row = ggplot2::vars(x)) +
+    ggplot2::geom_line()
+
+# Save the plot in png format
+"figures/walker-example.png" |>
+    ggplot2::ggsave(plot = p, width = 5 * 8 / 9, height = 3)
+"""

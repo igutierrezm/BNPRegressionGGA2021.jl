@@ -1,4 +1,4 @@
-function sample!(m::AbstractModel; mcmcsize = 4000, burnin = 2000, thin = 1)
+function sample!(m::AbstractModel; mcmcsize = 4000, burnin = mcmcsize ÷ 2, thin = 1)
     (; N1, D1, f, β) = skeleton(m)
     chainf = [zeros(N1) for _ in 1:(mcmcsize - burnin) ÷ thin]
     chainβ = [zeros(D1) for _ in 1:(mcmcsize - burnin) ÷ thin]

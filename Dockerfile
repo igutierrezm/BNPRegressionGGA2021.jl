@@ -1,8 +1,8 @@
 FROM rocker/r-ver:4.1.0
 
-# Install git, glpk-utils, libxt6, wget, xml2
+# Install git, glpk-utils, libxt6, wget, xml2, xdg-utils
 RUN apt-get update 
-RUN apt-get -y install git glpk-utils libxt6 wget xml2
+RUN apt-get -y install git glpk-utils libxt6 wget xml2 xdg-utils
 
 # Install some useful R packages
 RUN install2.r --error --skipinstalled --ncpus -1 \

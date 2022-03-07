@@ -122,12 +122,10 @@ end
 begin
     Random.seed!(1)
     N0, N1, Nrep = 1000, 50, 20
-    x1raw = LinRange(-1, 1, N1)
+    x1raw = LinRange(-1.5, 1.5, N1)
     x0raw = repeat(LinRange(-2, 2, N0 ÷ Nrep), Nrep)
-    # dy(x) = MixtureModel(Normal, [(x^3 - 1, 0.6), (x^3 + 1, 0.6)])
     dy(x) = MixtureModel(Normal, [(x^3 - 1, 0.6), (x^3 + 1, 0.6)])
     y0, y1, x1, X0, X1, f1 = preprocess(dy, x0raw, x1raw)
     df = fit(y0, y1, x1, X0, X1; mcmcsize = 10000)
-    R"""write.csv($df, "data/encargo-04-03-2020-ex-4", row.names = FALSE)"""
     plot(df; figname = "figures/encargo-04-03-2020-ex-4")
 end

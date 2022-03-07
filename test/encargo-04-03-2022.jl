@@ -112,7 +112,7 @@ begin
     N0, N1, Nrep = 1000, 50, 20
     x1raw = LinRange(-1.5, 1.5, N1)
     x0raw = repeat(LinRange(-2, 2, N0 ÷ Nrep), Nrep)
-    dy(x) = Normal(x^3, 1)
+    dy(x) = Normal(0.2x^3, 0.5)
     y0, y1, x1, X0, X1, f1 = preprocess(dy, x0raw, x1raw)
     df = fit(y0, y1, x1, X0, X1; mcmcsize = 10000)
     plot(df; figname = "figures/encargo-04-03-2020-ex-3")
@@ -122,9 +122,10 @@ end
 begin
     Random.seed!(1)
     N0, N1, Nrep = 1000, 50, 20
-    x1raw = LinRange(-1.5, 1.5, N1)
-    x0raw = repeat(LinRange(-2, 2, N0 ÷ Nrep), Nrep)
-    dy(x) = MixtureModel(Normal, [(x^3 - 1, 0.6), (x^3 + 1, 0.6)])
+    x1raw = LinRange(-2, 2, N1)
+    x0raw = repeat(LinRange(-2.5, 2.5, N0 ÷ Nrep), Nrep)
+    # dy(x) = MixtureModel(Normal, [(x^3 - 1, 0.6), (x^3 + 1, 0.6)])
+    dy(x) = MixtureModel(Normal, [(0.2x^3 - 1.5, 0.5), (0.2x^3 + 1.5, 0.5)])
     y0, y1, x1, X0, X1, f1 = preprocess(dy, x0raw, x1raw)
     df = fit(y0, y1, x1, X0, X1; mcmcsize = 10000)
     plot(df; figname = "figures/encargo-04-03-2020-ex-4")

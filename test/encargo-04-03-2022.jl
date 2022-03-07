@@ -110,7 +110,7 @@ end
 begin
     Random.seed!(1)
     N0, N1, Nrep = 1000, 50, 20
-    x1raw = LinRange(-1, 1, N1)
+    x1raw = LinRange(-1.5, 1.5, N1)
     x0raw = repeat(LinRange(-2, 2, N0 ÷ Nrep), Nrep)
     dy(x) = Normal(x^3, 1)
     y0, y1, x1, X0, X1, f1 = preprocess(dy, x0raw, x1raw)
@@ -118,7 +118,7 @@ begin
     plot(df; figname = "figures/encargo-04-03-2020-ex-3")
 end
 
-# Example 4: Continuous predictor (cubic regression, normal distribution)
+# Example 4: Continuous predictor (cubic regression, mixture distribution)
 begin
     Random.seed!(1)
     N0, N1, Nrep = 1000, 50, 20

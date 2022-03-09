@@ -11,6 +11,8 @@ Base.@kwdef struct Skeleton
     N1::Int = size(X1, 1)
     D0::Int = size(X0, 2)
     D1::Int = size(X1, 2)
+    X0vec::Vector{Vector{Float64}} = [X0[i, :] for i in 1:N0]
+    X1vec::Vector{Vector{Float64}} = [X1[i, :] for i in 1:N1]
     # HyperParameters
     m0β::Vector{Float64} = zeros(D0)
     Σ0β::Matrix{Float64} = 10 * I(D0)

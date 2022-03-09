@@ -6,14 +6,19 @@ Base.@kwdef struct DGSBPNormal <: AbstractModel
     X1::Matrix{Float64}
     mapping::Vector{Vector{Int}} = [[i] for i in 1:size(X0, 2)]
     update_γ::Bool = true
+    # Transformed data
+    D0::Int = size(X0, 2)
     # Hyperparameters
     m_μ0::Float64 = 0.0
     c_μ0::Float64 = 1.0
     a_τ0::Float64 = 0.1
     b_τ0::Float64 = 0.1
+    m0::Vector{Float64} = zeros(D0)
+    B0::Symmetric{Float64, Matrix{Float64}} = Symmetric(9.0 * I(D0))
     # Parameters
-    μ::Vector{Float64} = zeros(1)
     τ::Vector{Float64} = ones(1)
+    μ::Vector{Float64} = zeros(1)
+    b::Vector{Vector{Float64}} = [zeros(D0)]
     # Transformed parameters
     ȳ::Vector{Float64} = zeros(1)
     v::Vector{Float64} = zeros(1)
@@ -25,7 +30,7 @@ function skeleton(m::DGSBPNormal)
     return m.skl
 end
 
-function kernel_pdf(m::DGSBPNormal, yi::Float64, j::Int)
+function kernel_pdf(m::DGSBPNormal, yi::Float64, xi::Vector{Float64}, j::Int)
     kernel = Normal(m.μ[j], 1 / √m.τ[j])
     return pdf(kernel, yi)
 end

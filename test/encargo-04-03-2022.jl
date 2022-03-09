@@ -82,6 +82,18 @@ function plot(df; figname)
     """
 end
 
+# Example 0: Discrete predictor (linear regression, normal distribution)
+begin
+    Random.seed!(1)
+    N0, N1, Nrep = 200, 2, 20
+    x1raw = LinRange(-1, 1, N1)
+    x0raw = LinRange(-1, 1, N1)
+    dy(x) = Normal(x, 1)
+    y0, y1, x1, X0, X1, f1 = preprocess(dy, x0raw, x1raw)
+    df = fit(y0, y1, x1, X0, X1; mcmcsize = 1000)
+    plot(df; figname = "figures/encargo-04-03-2020-ex-0")
+end
+
 # Example 1: Continuous predictor (linear regression, normal distribution)
 begin
     Random.seed!(1)
@@ -90,7 +102,7 @@ begin
     x0raw = repeat(LinRange(-2, 2, N0 ÷ Nrep), Nrep)
     dy(x) = Normal(x, 1)
     y0, y1, x1, X0, X1, f1 = preprocess(dy, x0raw, x1raw)
-    df = fit(y0, y1, x1, X0, X1; mcmcsize = 10000)
+    df = fit(y0, y1, x1, X0, X1; mcmcsize = 1000)
     plot(df; figname = "figures/encargo-04-03-2020-ex-1")
 end
 

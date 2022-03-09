@@ -12,8 +12,8 @@ Apply 1 Gibbs update to the cluster atoms.
 update_atoms!(m::AbstractModel)
 
 """
-    kernel_pdf(m::AbstractModel, y0, j::Int)
+    kernel_pdf(m::AbstractModel, y0, x0,j::Int)
     
-Return the kernel pdf at `y0`, given a cluster label equal to `j`.
+Return the kernel pdf at `y0`, given a predictor `x0` a cluster label `j`.
 """
-kernel_pdf(m::AbstractModel, y0, j::Int)
+kernel_pdf(m::AbstractModel, y0, x0, j::Int)

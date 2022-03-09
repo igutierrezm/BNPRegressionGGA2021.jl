@@ -24,14 +24,14 @@ function step!(m::AbstractModel)
 end
 
 function update_f!(m::AbstractModel)
-    (; N1, y1, X1, β, ϕ1, f, s, rmax) = skeleton(m)
+    (; N1, y1, X1, X1vec, β, ϕ1, f, s, rmax) = skeleton(m)
     mul!(ϕ1, X1, β)
     @. ϕ1 = 1.0 / (1.0 + exp(ϕ1))
     for i in 1:N1
         f[i] = 0.0
         for j in 1:rmax[]
             wj = get_w(ϕ1[i], s[], j)
-            f[i] += wj * kernel_pdf(m, y1[i], j)
+            f[i] += wj * kernel_pdf(m, y1[i], X1vec[i], j)
         end
     end
 end
@@ -48,13 +48,13 @@ function get_w(θ0, s0, j)
 end
 
 function update_d!(m::AbstractModel)
-    (; N0, y0, d, r, rmax) = skeleton(m)
+    (; N0, y0, X0vec, d, r, rmax) = skeleton(m)
     p = zeros(rmax[])
     for i in 1:N0
         yi = y0[i]
         resize!(p, r[i])
         for j in 1:r[i]
-            p[j] = eps() + kernel_pdf(m, yi, j)
+            p[j] = eps() + kernel_pdf(m, yi, X0vec[i], j)
         end
         p ./= sum(p)
         try 

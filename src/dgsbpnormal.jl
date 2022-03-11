@@ -21,7 +21,7 @@ Base.@kwdef struct DGSBPNormal <: AbstractModel
     b::Vector{Vector{Float64}} = [zeros(D0)]
     # Transformed parameters
     ȳ::Vector{Float64} = zeros(1)
-    v::Vector{Float64} = zeros(1)
+    v::Vector{Float64} = zeros(1)    
     # Skeleton
     skl::Skeleton = Skeleton(; y0, y1, X0, X1, mapping, update_γ)
 end
@@ -44,7 +44,7 @@ function update_atoms!(m::DGSBPNormal)
         new_μ = rand(Normal(m_μ0, √(c_μ0 / new_τ)))
         push!(τ, new_τ)
         push!(μ, new_μ)
-    end    
+    end
     for j in 1:rmax(skl)
         m_μ1 = (c_μ0 * n[j] * ȳ[j] + m_μ0) / (c_μ0 * n[j] + 1)
         c_μ1 = c_μ0 / (c_μ0 * n[j] + 1)

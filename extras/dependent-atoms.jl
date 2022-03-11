@@ -3,7 +3,7 @@ begin
     using LinearAlgebra
     using Random 
 end;
-
+ 
 Base.@kwdef struct Foo
     # Data
     y::Vector{Float64}

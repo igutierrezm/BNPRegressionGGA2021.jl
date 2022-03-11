@@ -91,7 +91,7 @@ begin
     x1raw = LinRange(-1, 1, N1)
     dy(x) = Normal(x, 1)
     y0, y1, x1, X0, X1, f1 = preprocess(dy, x0raw, x1raw)
-    df, smpl = fit(y0, y1, x1, X0, X1; mcmcsize = 2000)
+    df, smpl = fit(y0, y1, x1, X0, X1; mcmcsize = 10000)
     plot(df; figname = "figures/encargo-11-03-2020-ex-0")
 end;
 
@@ -103,7 +103,7 @@ begin
     x0raw = repeat(LinRange(-2, 2, N0 ÷ Nrep), Nrep)
     dy(x) = Normal(x, 1)
     y0, y1, x1, X0, X1, f1 = preprocess(dy, x0raw, x1raw)
-    df, smpl = fit(y0, y1, x1, X0, X1; mcmcsize = 2000)
+    df, smpl = fit(y0, y1, x1, X0, X1; mcmcsize = 10000)
     plot(df; figname = "figures/encargo-11-03-2020-ex-1")
 end;
 
@@ -115,7 +115,7 @@ begin
     x0raw = repeat(LinRange(-2, 2, N0 ÷ Nrep), Nrep)
     dy(x) = MixtureModel(Normal, [(0.2x - 1.5, 0.5), (0.2x + 1.5, 0.5)])
     y0, y1, x1, X0, X1, f1 = preprocess(dy, x0raw, x1raw)
-    df, smpl = fit(y0, y1, x1, X0, X1; mcmcsize = 2000)
+    df, smpl = fit(y0, y1, x1, X0, X1; mcmcsize = 10000)
     plot(df; figname = "figures/encargo-11-03-2020-ex-2")
 end;
 
@@ -127,7 +127,7 @@ begin
     x0raw = repeat(LinRange(-2, 2, N0 ÷ Nrep), Nrep)
     dy(x) = Normal(0.2x^3, 0.5)
     y0, y1, x1, X0, X1, f1 = preprocess(dy, x0raw, x1raw)
-    df, smpl = fit(y0, y1, x1, X0, X1; mcmcsize = 2000)
+    df, smpl = fit(y0, y1, x1, X0, X1; mcmcsize = 10000)
     plot(df; figname = "figures/encargo-11-03-2020-ex-3")
 end;
 
@@ -140,6 +140,6 @@ begin
     # dy(x) = MixtureModel(Normal, [(x^3 - 1, 0.6), (x^3 + 1, 0.6)])
     dy(x) = MixtureModel(Normal, [(0.2x^3 - 1.5, 0.5), (0.2x^3 + 1.5, 0.5)])
     y0, y1, x1, X0, X1, f1 = preprocess(dy, x0raw, x1raw)
-    df, smpl = fit(y0, y1, x1, X0, X1; mcmcsize = 2000)
+    df, smpl = fit(y0, y1, x1, X0, X1; mcmcsize = 10000)
     plot(df; figname = "figures/encargo-11-03-2020-ex-4")
 end;

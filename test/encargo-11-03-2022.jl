@@ -52,7 +52,7 @@ function preprocess(dy, x0, x1)
     return y0, y1, x1, X0, X1, f1
 end;
 
-function fit(y0, y1, x1, X0, X1; mcmcsize = 10000)
+function fit(y0, y1, x1, X0, X1; mcmcsize = 20000)
     # Fit the model
     smpl = BNP.DGSBPNormalDependent(; y0, X0, y1, X1);
     fhchain, _ = BNP.sample!(smpl; mcmcsize);
@@ -85,61 +85,61 @@ end;
 
 # Example 0: Discrete predictor (linear regression, normal distribution)
 begin
-    Random.seed!(1)
+    Random.seed!(3)
     N0, N1, Nrep = 200, 2, 20
     x0raw = LinRange(-1, 1, N0)
     x1raw = LinRange(-1, 1, N1)
     dy(x) = Normal(x, 1)
     y0, y1, x1, X0, X1, f1 = preprocess(dy, x0raw, x1raw)
-    df, smpl = fit(y0, y1, x1, X0, X1; mcmcsize = 10000)
+    df, smpl = fit(y0, y1, x1, X0, X1; mcmcsize = 20000)
     plot(df; figname = "figures/encargo-11-03-2020-ex-0")
 end;
 
 # Example 1: Continuous predictor (linear regression, normal distribution)
 begin
-    Random.seed!(1)
+    Random.seed!(3)
     N0, N1, Nrep = 200, 50, 20
     x1raw = LinRange(-1, 1, N1)
     x0raw = repeat(LinRange(-2, 2, N0 ÷ Nrep), Nrep)
     dy(x) = Normal(x, 1)
     y0, y1, x1, X0, X1, f1 = preprocess(dy, x0raw, x1raw)
-    df, smpl = fit(y0, y1, x1, X0, X1; mcmcsize = 10000)
+    df, smpl = fit(y0, y1, x1, X0, X1; mcmcsize = 20000)
     plot(df; figname = "figures/encargo-11-03-2020-ex-1")
 end;
 
 # DGP 2: Continuous predictor (linear regression, mixture distribution)
 begin
-    Random.seed!(1)
+    Random.seed!(3)
     N0, N1, Nrep = 200, 50, 20
     x1raw = LinRange(-1, 1, N1)
     x0raw = repeat(LinRange(-2, 2, N0 ÷ Nrep), Nrep)
-    dy(x) = MixtureModel(Normal, [(0.2x - 1.5, 0.5), (0.2x + 1.5, 0.5)])
+    dy(x) = MixtureModel(Normal, [(0.2x - 1, 0.5), (0.2x + 1, 0.5)])
     y0, y1, x1, X0, X1, f1 = preprocess(dy, x0raw, x1raw)
-    df, smpl = fit(y0, y1, x1, X0, X1; mcmcsize = 10000)
+    df, smpl = fit(y0, y1, x1, X0, X1; mcmcsize = 20000)
     plot(df; figname = "figures/encargo-11-03-2020-ex-2")
 end;
 
 # Example 3: Continuous predictor (cubic regression, normal distribution)
 begin
-    Random.seed!(1)
+    Random.seed!(3)
     N0, N1, Nrep = 200, 50, 20
     x1raw = LinRange(-1.5, 1.5, N1)
     x0raw = repeat(LinRange(-2, 2, N0 ÷ Nrep), Nrep)
     dy(x) = Normal(0.2x^3, 0.5)
     y0, y1, x1, X0, X1, f1 = preprocess(dy, x0raw, x1raw)
-    df, smpl = fit(y0, y1, x1, X0, X1; mcmcsize = 10000)
+    df, smpl = fit(y0, y1, x1, X0, X1; mcmcsize = 20000)
     plot(df; figname = "figures/encargo-11-03-2020-ex-3")
 end;
 
 # Example 4: Continuous predictor (cubic regression, mixture distribution)
 begin
-    Random.seed!(1)
+    Random.seed!(3)
     N0, N1, Nrep = 200, 50, 20
     x1raw = LinRange(-2, 2, N1)
     x0raw = repeat(LinRange(-2.5, 2.5, N0 ÷ Nrep), Nrep)
     # dy(x) = MixtureModel(Normal, [(x^3 - 1, 0.6), (x^3 + 1, 0.6)])
     dy(x) = MixtureModel(Normal, [(0.2x^3 - 1.5, 0.5), (0.2x^3 + 1.5, 0.5)])
     y0, y1, x1, X0, X1, f1 = preprocess(dy, x0raw, x1raw)
-    df, smpl = fit(y0, y1, x1, X0, X1; mcmcsize = 10000)
+    df, smpl = fit(y0, y1, x1, X0, X1; mcmcsize = 20000)
     plot(df; figname = "figures/encargo-11-03-2020-ex-4")
 end;

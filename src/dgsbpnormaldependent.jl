@@ -8,6 +8,8 @@ Base.@kwdef struct DGSBPNormalDependent <: AbstractModel
     update_γ::Bool = true
     # Transformed data
     D0::Int = size(X0, 2)
+    ỹ0::Vector{Float64} = deepcopy(y0)
+    event0::Vector{Bool} = ones(length(y0))
     # Hyperparameters
     B0_b::Symmetric{Float64, Matrix{Float64}} = Symmetric(9.0 * I(D0))
     m0_b::Vector{Float64} = zeros(D0)
@@ -51,6 +53,7 @@ function update_atoms!(m::DGSBPNormalDependent)
         τ[j] = rand(Gamma(a1_τ, 1 / b1_τ))
         b[j] = rand(MvNormal(m1_b, Symmetric(B1_b / τ[j])))
     end
+    update_y!(m)
     return nothing
 end
 
@@ -77,4 +80,16 @@ function update_suffstats!(m::DGSBPNormalDependent)
         n[d[i]] += 1
     end
     return nothing
+end
+
+function update_y!(m::DGSBPNormalDependent)
+    (; ỹ0, event0, b, τ, skl) = m
+    (; X0vec, N0, y0, d) = skl
+    for i in 1:N0
+        if !event0[i]
+            dist = Normal(b[d[i]] ⋅ X0vec[i], 1 / √τ[d[i]])
+            tdist = Truncated(dist, ỹ0[i], Inf)
+            y0[i] = rand(tdist)
+        end
+    end
 end

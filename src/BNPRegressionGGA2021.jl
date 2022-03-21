@@ -7,6 +7,7 @@ using LinearAlgebra
 using Random
 using SpecialFunctions
 using Walker2020Sampling
+import Distributions: pdf, logpdf
 
 const BNB = BayesNegativeBinomial
 

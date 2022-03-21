@@ -13,21 +13,6 @@ begin
     import Base: rand
 end;
 
-struct LogGamma <: ContinuousUnivariateDistribution
-    shape::Float64 
-    scale::Float64
-end
-
-function pdf(d::LogGamma, x::Real)
-    dx = Gamma(d.shape, d.scale)
-    pdf(dx, exp(x)) * exp(x)
-end
-
-function rand(rng::AbstractRNG, d::LogGamma)
-    dx = Gamma(d.shape, d.scale)
-    log(rand(rng, dx))
-end
-
 function preprocess(dy, x0, x1)
     # Simulate the responses
     y0 = @. rand(dy(x0))
@@ -77,29 +62,9 @@ function fit(y0, y1, x1, X0, X1; mcmcsize = 20000, censoring_rate = 0)
     fhchain, _ = BNP.sample!(smpl; mcmcsize);
     fh = mean(fhchain)
 
-    # Organize the results as a DataFrame
-    df = DataFrame(; y1, x1, f1, fh)
-    return df, smpl
-end;
-
-function plot(df; figname)
-    R"""
-    for (var in c("fh", "f1")) {
-        xv <- sort(unique($df[["x1"]]))
-        yv <- sort(unique($df[["y1"]]))
-        zv <- $df |>
-            dplyr::select(x1, y1, !!var) |>
-            tidyr::pivot_wider(values_from = !!var, names_from = y1) |>
-            dplyr::select(-x1) |>
-            as.matrix()
-        png(paste0($figname, "-", var, ".png"))
-        fig <- persp(
-            x = xv, y = yv, z = zv, 
-            phi = 90, theta = 45, xlab = "x", ylab = "y", zlab = var
-        )  
-        dev.off()
-    }
-    """
+    # # Organize the results as a DataFrame
+    # df = DataFrame(; y1, x1, f1, fh)
+    # return df, smpl
 end;
 
 # Example 0: Discrete predictor (linear regression, normal distribution)
@@ -111,7 +76,6 @@ begin
     dy(x) = Normal(x, 1)
     y0, y1, x1, X0, X1, f1 = preprocess(dy, x0raw, x1raw)
     df, smpl = fit(y0, y1, x1, X0, X1; mcmcsize = 20000, censoring_rate = .2)
-    plot(df; figname = "figures/encargo-16-03-2022-ex-0")
 end;
 
 # Example 1: Continuous predictor (linear regression, normal distribution)

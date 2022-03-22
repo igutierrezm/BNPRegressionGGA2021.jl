@@ -1,14 +1,14 @@
 function sample!(m::AbstractModel; mcmcsize = 4000, burnin = mcmcsize ÷ 2, thin = 1)
-    (; N1, D1, f, β) = skeleton(m)
+    (; N1, D1, f, β, g) = skeleton(m)
     chainf = [zeros(N1) for _ in 1:(mcmcsize - burnin) ÷ thin]
     chainβ = [zeros(D1) for _ in 1:(mcmcsize - burnin) ÷ thin]
-    chaing = [zeros(Bool, D1) for _ in 1:(mcmcsize - burnin) ÷ thin]
+    chaing = [zeros(Bool, length(g)) for _ in 1:(mcmcsize - burnin) ÷ thin]
     for iter in 1:mcmcsize
         step!(m)
         if iter > burnin && iszero((iter - burnin) % thin)
             chainf[(iter - burnin) ÷ thin] .= f
             chainβ[(iter - burnin) ÷ thin] .= β
-            chaing[(iter - burnin) ÷ thin] .= (β .!= 0.0)
+            chaing[(iter - burnin) ÷ thin] .= g
         end
     end
     return chainf, chainβ, chaing
@@ -51,30 +51,13 @@ function update_d!(m::AbstractModel)
     (; N0, y0, X0vec, d, r, rmax) = skeleton(m)
     p = zeros(rmax[])
     for i in 1:N0
-        yi = y0[i]
         resize!(p, r[i])
         for j in 1:r[i]
-            p[j] = eps() + kernel_pdf(m, yi, X0vec[i], j)
+            p[j] = eps() + kernel_pdf(m, y0[i], X0vec[i], j)
         end
         p ./= sum(p)
-        try 
-            d[i] = rand(Categorical(p))
-        catch
-            p
-        end
+        d[i] = rand(Categorical(p))
     end
-    return nothing
-    # (; N0, y0, d, r) = skeleton(m)
-    # for i in 1:N0
-    #     yi = y0[i]
-    #     newd = 0
-    #     maxc = -Inf
-    #     for j in 1:r[i]
-    #         newc = kernel_pdf(m, yi, j) - log(-log(rand()))
-    #         newc > maxc && (maxc = newc; newd = j)
-    #     end
-    #     d[i] = newd
-    # end
     return nothing    
 end
 
@@ -85,7 +68,8 @@ function update_r!(m::AbstractModel)
     for i in 1:N0
         zi = rand(Beta(r[i] - d[i] + 1, d[i]))
         vi = rand(Gamma(r[i] + s[] - 1, 1))
-        r[i] = rand(Poisson((1 - ϕ0[i]) * zi * vi)) + d[i]
+        mi = rand(Poisson((1 - ϕ0[i]) * zi * vi)) # is ϕ0 or 1 - ϕ0? Verify this.
+        r[i] = mi + d[i]
     end
     rmax[] = maximum(r)
     return nothing
@@ -119,7 +103,9 @@ struct Womack <: DiscreteMultivariateDistribution
         p = big.([zeros(D); 1.0])
         for d1 in (D - 1):-1:0
             for d2 in 1:(D - d1)
-                p[1 + d1] += ζ * p[1 + d1 + d2] * binomial(big(d1 + d2), big(d1))
+                p[1 + d1] += (
+                    ζ * p[1 + d1 + d2] * binomial(big(d1 + d2), big(d1))
+                )
             end
         end
         p /= sum(p)

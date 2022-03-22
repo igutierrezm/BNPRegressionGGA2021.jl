@@ -51,7 +51,7 @@ function preprocess1()
     return y0, y1, X0, X1, mapping
 end;
 
-function fit(y0, y1, x1, X0, X1, mapping; mcmcsize = 10000)
+function fit(y0, y1, X0, X1, mapping; mcmcsize = 10000)
     # Generate some incidental censoring 
     event0 = ones(Bool, length(y0))
 
@@ -65,6 +65,6 @@ end;
 begin
     Random.seed!(1)
     y0, y1, X0, X1, mapping = preprocess1()
-    chaing = fit(y0, y1, x1, X0, X1, mapping; mcmcsize = 20000)
+    chaing = fit(y0, y1, X0, X1, mapping; mcmcsize = 20000)
 end;
 chaing

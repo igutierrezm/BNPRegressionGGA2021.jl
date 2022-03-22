@@ -1,14 +1,14 @@
 function sample!(m::AbstractModel; mcmcsize = 4000, burnin = mcmcsize ÷ 2, thin = 1)
-    (; N1, D1, f, β, g) = skeleton(m)
-    chainf = [zeros(N1) for _ in 1:(mcmcsize - burnin) ÷ thin]
-    chainβ = [zeros(D1) for _ in 1:(mcmcsize - burnin) ÷ thin]
-    chaing = [zeros(Bool, length(g)) for _ in 1:(mcmcsize - burnin) ÷ thin]
+    (; f, g, β) = skeleton(m)
+    chainf = [zeros(length(f)) for _ in 1:(mcmcsize - burnin) ÷ thin]
+    chaing = [zeros(length(g)) for _ in 1:(mcmcsize - burnin) ÷ thin]
+    chainβ = [zeros(length(β)) for _ in 1:(mcmcsize - burnin) ÷ thin]
     for iter in 1:mcmcsize
         step!(m)
         if iter > burnin && iszero((iter - burnin) % thin)
             chainf[(iter - burnin) ÷ thin] .= f
-            chainβ[(iter - burnin) ÷ thin] .= β
             chaing[(iter - burnin) ÷ thin] .= g
+            chainβ[(iter - burnin) ÷ thin] .= β
         end
     end
     return chainf, chainβ, chaing
@@ -24,7 +24,7 @@ function step!(m::AbstractModel)
 end
 
 function update_f!(m::AbstractModel)
-    (; N1, y1, X1, X1vec, β, ϕ1, f, s, rmax) = skeleton(m)
+    (; f, N1, rmax, s, X1, X1vec, y1, β, ϕ1) = skeleton(m)
     mul!(ϕ1, X1, β)
     @. ϕ1 = 1.0 / (1.0 + exp(ϕ1))
     for i in 1:N1
@@ -48,7 +48,7 @@ function get_w(θ0, s0, j)
 end
 
 function update_d!(m::AbstractModel)
-    (; N0, y0, X0vec, d, r, rmax) = skeleton(m)
+    (; d, N0, r, rmax, X0vec, y0) = skeleton(m)
     p = zeros(rmax[])
     for i in 1:N0
         resize!(p, r[i])
@@ -62,7 +62,7 @@ function update_d!(m::AbstractModel)
 end
 
 function update_r!(m::AbstractModel)
-    (; N0, X0, d, r, ϕ0, s, β, rmax) = skeleton(m)
+    (; d, N0, r, rmax, s, X0, β, ϕ0) = skeleton(m)
     mul!(ϕ0, X0, β)
     @. ϕ0 = 1.0 / (1.0 + exp(ϕ0))
     for i in 1:N0
@@ -76,7 +76,7 @@ function update_r!(m::AbstractModel)
 end
 
 function update_n!(m::AbstractModel)
-    (; N0, d, n, rmax) = skeleton(m)
+    (; d, n, N0, rmax) = skeleton(m)
     while length(n) < rmax[] 
         push!(n, 0)
     end
@@ -124,3 +124,4 @@ end
 function logpdf(d::Womack, g::Vector{Bool})
     return log(pdf(d, g))
 end
+# ok: 2022-03-22

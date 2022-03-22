@@ -5,7 +5,7 @@ Base.@kwdef struct DGSBPNormal <: AbstractModel
     y1::Vector{Float64}
     X1::Matrix{Float64}
     mapping::Vector{Vector{Int}} = [[i] for i in 1:size(X0, 2)]
-    update_g::Vector{Bool} = zeros(Bool, size(X0, 2))
+    update_g::Vector{Bool} = zeros(Bool, length(mapping))
     # Transformed data
     D0::Int = size(X0, 2)
     # Hyperparameters

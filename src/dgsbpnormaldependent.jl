@@ -36,14 +36,12 @@ function kernel_pdf(m::DGSBPNormalDependent, yi::Float64, xi::Vector{Float64}, j
 end
 
 function update_atoms!(m::DGSBPNormalDependent)
-    (; b, τ, m0_b, B0_b, a0_τ, b0_τ, XX, Xy, yy, skl) = m
-    (; mapping, D0, g, n) = skl
+    (; a0_τ, b, B0_b, b0_τ, m0_b, skl, XX, Xy, yy, τ) = m
+    (; D0, g, mapping, n) = skl
     update_suffstats!(m)
     while length(τ) < rmax(skl)
-        new_τ = 1.0
-        new_b = zeros(D0)
-        push!(τ, new_τ)
-        push!(b, new_b)
+        push!(τ, 1.0)
+        push!(b, zeros(D0))
     end
     gexp = zeros(Bool, D0)
     for d in 1:length(mapping)
@@ -58,14 +56,14 @@ function update_atoms!(m::DGSBPNormalDependent)
         b[j][.!gexp] .= 0.0
         b[j][gexp] .= rand(MvNormal(m1_b, Symmetric(B1_b / τ[j])))
     end
-    update_y!(m)
     update_g!(m)
+    update_y!(m)
     return nothing
 end
 
 function update_suffstats!(m::DGSBPNormalDependent)
-    (; XX, Xy, yy, skl) = m
-    (; y0, X0vec, N0, D0, d, n, rmax) = skl
+    (; skl, XX, Xy, yy) = m
+    (; d, D0, n, N0, rmax, X0vec, y0) = skl
     for j in 1:rmax[]
         if length(XX) >= j
             XX[j] .= 0.0
@@ -89,8 +87,8 @@ function update_suffstats!(m::DGSBPNormalDependent)
 end
 
 function update_y!(m::DGSBPNormalDependent)
-    (; ỹ0, event0, b, τ, skl) = m
-    (; X0vec, N0, y0, d) = skl
+    (; b, event0, skl, ỹ0, τ) = m
+    (; d, N0, X0vec, y0) = skl
     for i in 1:N0
         if !event0[i]
             dist = Normal(b[d[i]] ⋅ X0vec[i], 1 / √τ[d[i]])
@@ -101,9 +99,9 @@ function update_y!(m::DGSBPNormalDependent)
 end
 
 function update_g!(m::DGSBPNormalDependent)
-    (; m0_b, B0_b, a0_τ, b0_τ, XX, Xy, yy, update_g, mapping, skl) = m
-    (; D0, rmodel, n) = skl
-    (; g, μ0β, Σ0β, ζ0g) = rmodel
+    (; a0_τ, B0_b, b0_τ, m0_b, mapping, skl, update_g, XX, Xy, yy) = m
+    (; D0, n, rmodel) = skl
+    (; g, ζ0g, μ0β, Σ0β) = rmodel
     gexp = zeros(Bool, D0)
     for d in 1:length(mapping)
         gexp[mapping[d]] .= g[d]

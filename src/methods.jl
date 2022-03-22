@@ -68,7 +68,7 @@ function update_r!(m::AbstractModel)
     for i in 1:N0
         zi = rand(Beta(r[i] - d[i] + 1, d[i]))
         vi = rand(Gamma(r[i] + s[] - 1, 1))
-        mi = rand(Poisson((1 - ϕ0[i]) * zi * vi)) # is ϕ0 or 1 - ϕ0? Verify this.
+        mi = rand(Poisson((1 - ϕ0[i]) * zi * vi))
         r[i] = mi + d[i]
     end
     rmax[] = maximum(r)

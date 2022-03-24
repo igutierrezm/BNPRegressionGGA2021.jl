@@ -15,9 +15,9 @@ Base.@kwdef struct Skeleton
     X1vec::Vector{Vector{Float64}} = [X1[i, :] for i in 1:N1]
     # HyperParameters
     m0β::Vector{Float64} = zeros(D0)
-    Σ0β::Matrix{Float64} = 10 * I(D0)
+    Σ0β::Matrix{Float64} = 100 * I(D0)
     # Parameters
-    rmodel::BNB.Sampler = BNB.Sampler(ones(Int, N0), X0; mapping, update_g = zeros(Bool, length(mapping)), s = [2])
+    rmodel::BNB.Sampler = BNB.Sampler(ones(Int, N0), X0; m0β, Σ0β, mapping, update_g = zeros(Bool, length(mapping)), s = [2])
     r::Vector{Int} = ones(Int, N0)
     d::Vector{Int} = ones(Int, N0)
     β::Vector{Float64} = rmodel.β

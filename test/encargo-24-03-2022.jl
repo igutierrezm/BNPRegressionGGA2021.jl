@@ -89,7 +89,7 @@ begin
     Random.seed!(2)
     N0, N1 = 500, 50
     y0, X0, y1, X1 = simulate_sample(N0, N1);
-    smpl = BNPRegressionGGA2021.DGSBPNormal(; y0, X0, y1, X1);
+    smpl = BNPRegressionGGA2021.DGSBPNormalDependent(; y0, X0, y1, X1);
     _, _, chaing = BNPRegressionGGA2021.sample!(smpl; mcmcsize = 10000);
 end;
 mean(chaing)

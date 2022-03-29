@@ -11,10 +11,10 @@ Base.@kwdef struct DGSBPNormalDependent <: AbstractModel
     ỹ0::Vector{Float64} = deepcopy(y0)
     event0::Vector{Bool} = ones(length(y0))
     # Hyperparameters
-    B0_b::Symmetric{Float64, Matrix{Float64}} = Symmetric(1.0 * I(D0))
+    B0_b::Symmetric{Float64, Matrix{Float64}} = Symmetric(9.0 * I(D0))
     m0_b::Vector{Float64} = zeros(D0)
-    a0_τ::Float64 = 1.0
-    b0_τ::Float64 = 1.0
+    a0_τ::Float64 = 0.1
+    b0_τ::Float64 = 0.1
     # Parameters
     b::Vector{Vector{Float64}} = [zeros(D0)]
     τ::Vector{Float64} = [1.0]

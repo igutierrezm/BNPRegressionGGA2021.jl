@@ -1,7 +1,9 @@
 begin
+    using CSV
     using Revise
     using BNPRegressionGGA2021
     using DataFrames
+    using DataStructures
     using Distributions
     using FileIO
     using Random
@@ -40,7 +42,9 @@ function preprocess(dy, x0, x1)
     y0 = (y0 .- my0) ./ sy0
 
     # Add a constant term to the design matrices
-    X0 = [ones(size(X0, 1)) X0 rand([0, 1], size(X0, 1), 4)]
+    X0d = rand([0, 1], size(X0, 1), 4)
+    X0d = ((X0d .- mean(X0d, dims = 1)) ./ std(X0d, dims = 1))
+    X0 = [ones(size(X0, 1)) X0 X0d]
     X1 = zeros(0, size(X0, 2))
 
     # Generate the true (standardized) density over the grid
@@ -53,72 +57,70 @@ function preprocess(dy, x0, x1)
     return y0, y1, x1, X0, X1, f1, mapping
 end;
 
-# Example 0: Discrete predictor (linear regression, normal distribution)
-begin
-    Random.seed!(3)
-    N0, N1, Nrep = 500, 0, 20
-    x0raw = LinRange(-1, 1, N0)
-    x1raw = LinRange(-1, 1, N1)
-    dy(x) = Normal(x, 1)
-    y0, y1, x1, X0, X1, f1, mapping = preprocess(dy, x0raw, x1raw)
-    smpl = BNP.DGSBPNormalDependent(; y0, X0, y1, X1, mapping)
-    _, _, chaing = BNP.sample!(smpl; mcmcsize = 40000)
-    df = DataFrame(j = 1:length(mean(chaing)), value = mean(chaing))
-    CSV.write("data/mean_chaing0.csv", df)
-end;
-
 # Example 1: Continuous predictor (linear regression, normal distribution)
 begin
-    Random.seed!(3)
-    N0, N1, Nrep = 500, 50, 20
+    Random.seed!(1)
+    N0, N1, Nrep = 200, 0, 20
     x1raw = LinRange(-1, 1, N1)
     x0raw = repeat(LinRange(-2, 2, N0 ÷ Nrep), Nrep)
     dy(x) = Normal(x, 1)
     y0, y1, x1, X0, X1, f1, mapping = preprocess(dy, x0raw, x1raw)
     smpl = BNP.DGSBPNormalDependent(; y0, X0, y1, X1, mapping)
-    _, _, chaing = BNP.sample!(smpl; mcmcsize = 40000)
-    df = DataFrame(j = 1:length(mean(chaing)), value = mean(chaing))
-    CSV.write("data/mean_chaing1.csv", df)
+    _, _, chaing = BNP.sample!(smpl; mcmcsize = 10000)
+    chaing |>
+        DataStructures.counter |>
+        collect |>
+        x -> sort(x, by = x -> x[2], rev = true) |>
+        x -> CSV.write("data/2022-03-29-chaing1_counts.csv", x)
 end;
 
 # Example 2: Continuous predictor (linear regression, mixture distribution)
 begin
-    Random.seed!(3)
-    N0, N1, Nrep = 500, 0, 20
+    Random.seed!(2)
+    N0, N1, Nrep = 200, 0, 20
     x1raw = LinRange(-1, 1, N1)
     x0raw = repeat(LinRange(-2, 2, N0 ÷ Nrep), Nrep)
     dy(x) = MixtureModel(Normal, [(0.2x - 1, 0.5), (0.2x + 1, 0.5)])
     y0, y1, x1, X0, X1, f1, mapping = preprocess(dy, x0raw, x1raw)
     smpl = BNP.DGSBPNormalDependent(; y0, X0, y1, X1, mapping)
-    _, _, chaing = BNP.sample!(smpl; mcmcsize = 40000)
-    df = DataFrame(j = 1:length(mean(chaing)), value = mean(chaing))
-    CSV.write("data/mean_chaing2.csv", df)
+    _, _, chaing = BNP.sample!(smpl; mcmcsize = 10000)
+    chaing |>
+        DataStructures.counter |>
+        collect |>
+        x -> sort(x, by = x -> x[2], rev = true) |>
+        x -> CSV.write("data/2022-03-29-chaing2_counts.csv", x)
 end;
 
 # Example 3: Continuous predictor (cubic regression, normal distribution)
 begin
-    Random.seed!(3)
-    N0, N1, Nrep = 500, 0, 20
+    Random.seed!(1)
+    N0, N1, Nrep = 200, 0, 20
     x1raw = LinRange(-1.5, 1.5, N1)
     x0raw = repeat(LinRange(-2, 2, N0 ÷ Nrep), Nrep)
     dy(x) = Normal(0.2x^3, 0.5)
     y0, y1, x1, X0, X1, f1, mapping = preprocess(dy, x0raw, x1raw)
     smpl = BNP.DGSBPNormalDependent(; y0, X0, y1, X1, mapping)
-    _, _, chaing = BNP.sample!(smpl; mcmcsize = 40000)
-    df = DataFrame(j = 1:length(mean(chaing)), value = mean(chaing))
-    CSV.write("data/mean_chaing3.csv", df)
+    _, _, chaing = BNP.sample!(smpl; mcmcsize = 10000)
+    chaing |>
+        DataStructures.counter |>
+        collect |>
+        x -> sort(x, by = x -> x[2], rev = true) |>
+        x -> CSV.write("data/2022-03-29-chaing3_counts.csv", x)
 end;
 
 # Example 4: Continuous predictor (cubic regression, mixture distribution)
 begin
-    Random.seed!(3)
-    N0, N1, Nrep = 500, 0, 20
+    Random.seed!(1)
+    N0, N1, Nrep = 200, 0, 20
     x1raw = LinRange(-2, 2, N1)
     x0raw = repeat(LinRange(-2.5, 2.5, N0 ÷ Nrep), Nrep)
     dy(x) = MixtureModel(Normal, [(0.2x^3 - 1.5, 0.5), (0.2x^3 + 1.5, 0.5)])
     y0, y1, x1, X0, X1, f1, mapping = preprocess(dy, x0raw, x1raw)
     smpl = BNP.DGSBPNormalDependent(; y0, X0, y1, X1, mapping)
-    _, _, chaing = BNP.sample!(smpl; mcmcsize = 40000)
-    df = DataFrame(j = 1:length(mean(chaing)), value = mean(chaing))
-    CSV.write("data/mean_chaing4.csv", df)
+    _, _, chaing = BNP.sample!(smpl; mcmcsize = 10000)
+    chaing |>
+        DataStructures.counter |>
+        collect |>
+        x -> sort(x, by = x -> x[2], rev = true) |>
+        x -> CSV.write("data/2022-03-29-chaing4_counts.csv", x)
 end;

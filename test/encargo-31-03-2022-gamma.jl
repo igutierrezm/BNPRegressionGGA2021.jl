@@ -5,59 +5,13 @@ begin
     using DataFrames
     using DataStructures
     using Distributions
-    using FileIO
     using Random
     using RCall
     using Statistics
     using StatsBase
     using LinearAlgebra
     const BNP = BNPRegressionGGA2021
-    # import Distributions: pdf, mean, var
-    # import Base: rand    
 end;
-
-# struct SkewNormal <: ContinuousUnivariateDistribution
-#     location::Float64 # ξ
-#     scale::Float64 # ω
-#     slant::Float64 # α
-# end
-
-# function pdf(d::SkewNormal, x::Real)
-#     ξ = d.location 
-#     ω = d.scale 
-#     α = d.slant
-#     z = (x - ξ) / ω
-#     return (2 / ω) * pdf(Normal(), z) * cdf(Normal(), α * z)
-# end
-
-# function rand(rng::AbstractRNG, d::SkewNormal)
-#     ξ = d.location
-#     ω = d.scale
-#     α = d.slant
-#     δ = α / √(1 + α^2)
-#     z = √(1 - δ^2) * randn(rng) + δ * abs(randn(rng))
-#     return ξ + ω * z
-# end
-
-# function mean(d::SkewNormal)
-#     ξ = d.location 
-#     ω = d.scale 
-#     α = d.slant
-#     b = √(2 / π)
-#     δ = α / √(1 + α^2)
-#     μz = b * δ
-#     return ξ + ω * μz
-# end
-
-# function var(d::SkewNormal)
-#     ω = d.scale 
-#     α = d.slant
-#     b = √(2 / π)
-#     δ = α / √(1 + α^2)
-#     σ2z = 1 - b^2 * δ^2
-#     σ2y = ω^2 * σ2z
-#     return σ2y
-# end
 
 function preprocess(dy, x0, x1)
     # Simulate the responses
@@ -105,7 +59,7 @@ end;
 # Example 1: Continuous predictor (linear regression, normal distribution)
 begin
     Random.seed!(1)
-    N0, N1, Nrep, Niter = 200, 0, 20, 2
+    N0, N1, Nrep, Niter = 200, 0, 20, 100
     dy(x) = Normal(x, 1)
     x1raw = LinRange(-1, 1, N1)
     x0raw = repeat(LinRange(-2, 2, N0 ÷ Nrep), Nrep)
@@ -130,7 +84,7 @@ end;
 # Example 2: Continuous predictor (linear regression, skewnormal distribution)
 begin
     Random.seed!(1)
-    N0, N1, Nrep, Niter = 200, 0, 20, 2
+    N0, N1, Nrep, Niter = 200, 0, 20, 100
     dy(x) = SkewNormal(2x, 4, 4)
     x1raw = LinRange(-1, 1, N1)
     x0raw = repeat(LinRange(-2, 2, N0 ÷ Nrep), Nrep)
@@ -155,7 +109,7 @@ end;
 # Example 3: Continuous predictor (cubic regression, normal distribution)
 begin
     Random.seed!(1)
-    N0, N1, Nrep, Niter = 200, 0, 20, 2
+    N0, N1, Nrep, Niter = 200, 0, 20, 100
     dy(x) = Normal(0.2x^3, 0.5)
     x1raw = LinRange(-1, 1, N1)
     x0raw = repeat(LinRange(-2, 2, N0 ÷ Nrep), Nrep)
@@ -180,7 +134,7 @@ end;
 # Example 4: Continuous predictor (cubic regression, mixture distribution)
 begin
     Random.seed!(1)
-    N0, N1, Nrep, Niter = 200, 0, 20, 2
+    N0, N1, Nrep, Niter = 200, 0, 20, 100
     dy(x) = SkewNormal(0.4x^3, 4, 4)
     x1raw = LinRange(-1, 1, N1)
     x0raw = repeat(LinRange(-2, 2, N0 ÷ Nrep), Nrep)

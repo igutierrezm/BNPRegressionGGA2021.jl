@@ -1,12 +1,12 @@
 FROM rocker/r-ver:4.1.0
 
-# Install git, glpk-utils, libxt6, wget, xml2, xdg-utils
+# Install git, glpk-utils, libxt6, wget, xml2, xdg-utils, default-jre
 RUN apt-get update 
-RUN apt-get -y install git glpk-utils libxt6 wget xml2 xdg-utils
+RUN apt-get -y install default-jre git glpk-utils libxt6 wget xml2 xdg-utils
 
 # Install some useful R packages
 RUN install2.r --error --skipinstalled --ncpus -1 \
-    dplyr ggplot2 JuliaConnectoR languageserver LPKsample readr tidyr
+    dplyr ggplot2 glmulti JuliaConnectoR languageserver LPKsample readr tidyr
 
 # Install julia 1.7.0
 WORKDIR /opt/

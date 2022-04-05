@@ -226,3 +226,42 @@ begin
     filename = "data/final/gamma-skewnormal-freq-200.csv"
     run_experiment_freq(dy; N0 = 200, Nrep = 5, Niter = 100, id = 2, filename)
 end 
+
+# Summary of the results
+R"""
+data <- 
+    list.files(path = "data/final", pattern = "gamma*", full.names = TRUE) |>
+    purrr::map(readr::read_csv, show_col_types = FALSE) |>
+    dplyr::bind_rows() |>
+    dplyr::group_by(method, id, N0, g1, g2, g3, g4, g5, g6) |>
+    dplyr::count(name = "frequency") |>
+    dplyr::ungroup() |>
+    dplyr::mutate(gamma = paste0(g1, g2, g3, g4, g5, g6)) |>
+    dplyr::select(gamma, frequency, id, method, N = N0)
+p <- 
+    data |>
+    dplyr::mutate(
+        method = method |>
+            dplyr::recode(bnp = "BNP", freq = "BSS (Best Subset Selection)"),
+        distribution = id |>
+        dplyr::recode(`1` = "Normal", `2` = "Skew Normal"),
+        N = factor(N, ordered = TRUE)
+    ) |>
+    ggplot2::ggplot(ggplot2::aes(y = gamma, x = N, fill = frequency)) +
+    ggplot2::geom_tile(color = "grey90") +
+    ggplot2::facet_grid(
+        distribution ~ method, 
+        labeller = ggplot2::labeller(
+            distribution = ggplot2::label_both,
+            method = ggplot2::label_both
+        )
+    ) +
+    ggplot2::theme_classic() +
+    ggplot2::theme(legend.position = "top") +
+    ggplot2::scale_fill_gradient(low = "white", high = "black") + 
+    ggplot2::labs(
+        x = "N (sample size)",
+        y = "gamma (hypothesis vector), as a string of 0s and 1s"
+    )
+ggplot2::ggsave("figures/final/heatmap-regression.png")
+"""

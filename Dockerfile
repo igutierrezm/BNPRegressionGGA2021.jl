@@ -6,7 +6,7 @@ RUN apt-get -y install default-jre git glpk-utils libxt6 wget xml2 xdg-utils
 
 # Install some useful R packages
 RUN install2.r --error --skipinstalled --ncpus -1 \
-    dplyr ggplot2 glmulti JuliaConnectoR languageserver LPKsample readr tidyr
+    dplyr ggplot2 JuliaConnectoR languageserver leaps LPKsample readr tidyr
 
 # Install julia 1.7.0
 WORKDIR /opt/

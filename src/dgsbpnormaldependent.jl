@@ -6,10 +6,10 @@ Base.@kwdef struct DGSBPNormalDependent <: AbstractModel
     X1::Matrix{Float64}
     mapping::Vector{Vector{Int}} = [[i] for i in 1:size(X0, 2)]
     update_g::Vector{Bool} = ones(Bool, size(X0, 2))
+    event0::Vector{Bool} = ones(length(y0))
     # Transformed data
     D0::Int = size(X0, 2)
     ỹ0::Vector{Float64} = deepcopy(y0)
-    event0::Vector{Bool} = ones(length(y0))
     # Hyperparameters
     B0_b::Symmetric{Float64, Matrix{Float64}} = Symmetric(9.0 * I(D0))
     m0_b::Vector{Float64} = zeros(D0)

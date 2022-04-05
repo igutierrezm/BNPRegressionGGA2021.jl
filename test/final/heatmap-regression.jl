@@ -146,91 +146,95 @@ end
 # Experiment 1, N0 = 50 (bnp)
 begin 
     dy(x) = Normal(x, 1)
-    filename = "data/final/gamma-normal-bnp-50.csv"
+    filename = "data/final/regression-gamma-normal-bnp-50.csv"
     run_experiment_bnp(dy; N0 = 50, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 50 (freq)
 begin 
     dy(x) = Normal(x, 1)
-    filename = "data/final/gamma-normal-freq-50.csv"
+    filename = "data/final/regression-gamma-normal-freq-50.csv"
     run_experiment_freq(dy; N0 = 50, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 100 (bnp)
 begin 
     dy(x) = Normal(x, 1)
-    filename = "data/final/gamma-normal-bnp-100.csv"
+    filename = "data/final/regression-gamma-normal-bnp-100.csv"
     run_experiment_bnp(dy; N0 = 100, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 100 (freq)
 begin 
     dy(x) = Normal(x, 1)
-    filename = "data/final/gamma-normal-freq-100.csv"
+    filename = "data/final/regression-gamma-normal-freq-100.csv"
     run_experiment_freq(dy; N0 = 100, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 200 (bnp)
 begin 
     dy(x) = Normal(x, 1)
-    filename = "data/final/gamma-normal-bnp-200.csv"
+    filename = "data/final/regression-gamma-normal-bnp-200.csv"
     run_experiment_bnp(dy; N0 = 200, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 200 (freq)
 begin 
     dy(x) = Normal(x, 1)
-    filename = "data/final/gamma-normal-freq-200.csv"
+    filename = "data/final/regression-gamma-normal-freq-200.csv"
     run_experiment_freq(dy; N0 = 200, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 2, N0 = 50 (bnp)
 begin 
     dy(x) = SkewNormal(x, 1.5, 4)
-    filename = "data/final/gamma-skewnormal-bnp-50.csv"
+    filename = "data/final/regression-gamma-skewnormal-bnp-50.csv"
     run_experiment_bnp(dy; N0 = 50, Nrep = 5, Niter = 100, id = 2, filename)
 end 
 
 # Experiment 2, N0 = 50 (freq)
 begin 
     dy(x) = SkewNormal(x, 1.5, 4)
-    filename = "data/final/gamma-skewnormal-freq-50.csv"
+    filename = "data/final/regression-gamma-skewnormal-freq-50.csv"
     run_experiment_freq(dy; N0 = 50, Nrep = 5, Niter = 100, id = 2, filename)
 end 
 
 # Experiment 2, N0 = 100 (bnp)
 begin 
     dy(x) = SkewNormal(x, 1.5, 4)
-    filename = "data/final/gamma-skewnormal-bnp-100.csv"
+    filename = "data/final/regression-gamma-skewnormal-bnp-100.csv"
     run_experiment_bnp(dy; N0 = 100, Nrep = 5, Niter = 100, id = 2, filename)
 end 
 
 # Experiment 2, N0 = 100 (freq)
 begin 
     dy(x) = SkewNormal(x, 1.5, 4)
-    filename = "data/final/gamma-skewnormal-freq-100.csv"
+    filename = "data/final/regression-gamma-skewnormal-freq-100.csv"
     run_experiment_freq(dy; N0 = 100, Nrep = 5, Niter = 100, id = 2, filename)
 end 
 
 # Experiment 2, N0 = 200 (bnp)
 begin 
     dy(x) = SkewNormal(x, 1.5, 4)
-    filename = "data/final/gamma-skewnormal-bnp-200.csv"
+    filename = "data/final/regression-gamma-skewnormal-bnp-200.csv"
     run_experiment_bnp(dy; N0 = 200, Nrep = 5, Niter = 100, id = 2, filename)
 end 
 
 # Experiment 2, N0 = 200 (bnp)
 begin 
     dy(x) = SkewNormal(x, 1.5, 4)
-    filename = "data/final/gamma-skewnormal-freq-200.csv"
+    filename = "data/final/regression-gamma-skewnormal-freq-200.csv"
     run_experiment_freq(dy; N0 = 200, Nrep = 5, Niter = 100, id = 2, filename)
 end 
 
 # Summary of the results
 R"""
 data <- 
-    list.files(path = "data/final", pattern = "gamma*", full.names = TRUE) |>
+    list.files(
+        path = "data/final", 
+        pattern = "regression-gamma*", 
+        full.names = TRUE
+    ) |>
     purrr::map(readr::read_csv, show_col_types = FALSE) |>
     dplyr::bind_rows() |>
     dplyr::group_by(method, id, N0, g1, g2, g3, g4, g5, g6) |>

@@ -14,21 +14,33 @@ begin
 end;
 
 R"""
-library(ISLR)
+library(dplyr)
 library(leaps)
-data("swiss")
-# Inspect the data
-sample_n(swiss, 3)
-fit <- regsubsets(Fertility~., data = swiss, nvmax = 5)
-fitsum <- summary(models, matrix.logical = TRUE)
-kstar <- which.max(fitsum$bic)
-best_gamma <- fitsum$which[kstar, ]
+
+# Simulate a dataset
+N <- 50
+K <- 5
+df <- 
+    data.frame(
+        x1 = rnorm(N),
+        x2 = runif(N) <= 0.5,
+        x3 = runif(N) <= 0.5,
+        x4 = runif(N) <= 0.5,
+        x5 = runif(N) <= 0.5
+    ) |>
+    dplyr::mutate(y = sn::rsn(xi = x1, omega = 1.5, alpha = 4))
+
+# Fit the model
+fitted_model <- leaps::regsubsets(y ~ ., data = df, nvmax = 5)
+fit_summary <- summary(fitted_model, matrix.logical = TRUE)
+kstar <- which.min(fit_summary$bic)
+best_gamma <- fit_summary$which[kstar, ]
 """
 
 # Helper functions -------------------------------------------------------------
 
 function run_experiment_bnp(dy; N0, Nrep, Niter, id, filename)
-    Random.seed!(1) # seed
+    Random.seed!(3) # seed
     samples = [generate_sample(dy; N0, Nrep) for _ in 1:Niter] # data
     gammas = [get_gamma_bnp(samples[id]) for id in 1:Niter] # map gamma
     reduced_gammas = reduce_gammas(gammas) # reduced df
@@ -39,7 +51,7 @@ function run_experiment_bnp(dy; N0, Nrep, Niter, id, filename)
 end
 
 function run_experiment_freq(dy; N0, Nrep, Niter, id, filename)
-    Random.seed!(1) # seed
+    Random.seed!(3) # seed
     samples = [generate_sample(dy; N0, Nrep) for _ in 1:Niter] # data
     gammas = [get_gamma_freq(samples[id]) for id in 1:Niter] # map gamma
     reduced_gammas = reduce_gammas(gammas) # reduced df
@@ -145,84 +157,84 @@ end
 
 # Experiment 1, N0 = 50 (bnp)
 begin 
-    dy(x) = Normal(x, 1)
+    dy(x) = Normal(0.6x, 1)
     filename = "data/final/regression-gamma-normal-bnp-50.csv"
     run_experiment_bnp(dy; N0 = 50, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 50 (freq)
 begin 
-    dy(x) = Normal(x, 1)
+    dy(x) = Normal(0.6x, 1)
     filename = "data/final/regression-gamma-normal-freq-50.csv"
     run_experiment_freq(dy; N0 = 50, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 100 (bnp)
 begin 
-    dy(x) = Normal(x, 1)
+    dy(x) = Normal(0.6x, 1)
     filename = "data/final/regression-gamma-normal-bnp-100.csv"
     run_experiment_bnp(dy; N0 = 100, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 100 (freq)
 begin 
-    dy(x) = Normal(x, 1)
+    dy(x) = Normal(0.6x, 1)
     filename = "data/final/regression-gamma-normal-freq-100.csv"
     run_experiment_freq(dy; N0 = 100, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 200 (bnp)
 begin 
-    dy(x) = Normal(x, 1)
+    dy(x) = Normal(0.6x, 1)
     filename = "data/final/regression-gamma-normal-bnp-200.csv"
-    run_experiment_bnp(dy; N0 = 200, Nrep = 5, Niter = 100, id = 1, filename)
+    run_experiment_bnp(dy; N0 = 200, Nrep = 5, Niter = 10, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 200 (freq)
 begin 
-    dy(x) = Normal(x, 1)
+    dy(x) = Normal(0.6x, 1)
     filename = "data/final/regression-gamma-normal-freq-200.csv"
     run_experiment_freq(dy; N0 = 200, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 2, N0 = 50 (bnp)
 begin 
-    dy(x) = SkewNormal(x, 1.5, 4)
+    dy(x) = SkewNormal(0.6x, 1.5, 4)
     filename = "data/final/regression-gamma-skewnormal-bnp-50.csv"
     run_experiment_bnp(dy; N0 = 50, Nrep = 5, Niter = 100, id = 2, filename)
 end 
 
 # Experiment 2, N0 = 50 (freq)
 begin 
-    dy(x) = SkewNormal(x, 1.5, 4)
+    dy(x) = SkewNormal(0.6x, 1.5, 4)
     filename = "data/final/regression-gamma-skewnormal-freq-50.csv"
     run_experiment_freq(dy; N0 = 50, Nrep = 5, Niter = 100, id = 2, filename)
 end 
 
 # Experiment 2, N0 = 100 (bnp)
 begin 
-    dy(x) = SkewNormal(x, 1.5, 4)
+    dy(x) = SkewNormal(0.6x, 1.5, 4)
     filename = "data/final/regression-gamma-skewnormal-bnp-100.csv"
     run_experiment_bnp(dy; N0 = 100, Nrep = 5, Niter = 100, id = 2, filename)
 end 
 
 # Experiment 2, N0 = 100 (freq)
 begin 
-    dy(x) = SkewNormal(x, 1.5, 4)
+    dy(x) = SkewNormal(0.6x, 1.5, 4)
     filename = "data/final/regression-gamma-skewnormal-freq-100.csv"
     run_experiment_freq(dy; N0 = 100, Nrep = 5, Niter = 100, id = 2, filename)
 end 
 
 # Experiment 2, N0 = 200 (bnp)
 begin 
-    dy(x) = SkewNormal(x, 1.5, 4)
+    dy(x) = SkewNormal(0.6x, 1.5, 4)
     filename = "data/final/regression-gamma-skewnormal-bnp-200.csv"
     run_experiment_bnp(dy; N0 = 200, Nrep = 5, Niter = 100, id = 2, filename)
 end 
 
-# Experiment 2, N0 = 200 (bnp)
+# Experiment 2, N0 = 200 (freq)
 begin 
-    dy(x) = SkewNormal(x, 1.5, 4)
+    dy(x) = SkewNormal(0.6x, 1.5, 4)
     filename = "data/final/regression-gamma-skewnormal-freq-200.csv"
     run_experiment_freq(dy; N0 = 200, Nrep = 5, Niter = 100, id = 2, filename)
 end 

@@ -187,7 +187,7 @@ end
 begin 
     dy(x) = Normal(0.6x, 1)
     filename = "data/final/regression-gamma-normal-bnp-200.csv"
-    run_experiment_bnp(dy; N0 = 200, Nrep = 5, Niter = 10, id = 1, filename)
+    run_experiment_bnp(dy; N0 = 200, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 200 (freq)

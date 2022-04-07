@@ -11,6 +11,8 @@ begin
     using StatsBase
     using LinearAlgebra
     const BNP = BNPRegressionGGA2021
+    import Distributions: pdf
+    import Base: rand
 end;
 
 # Helper functions -------------------------------------------------------------

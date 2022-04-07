@@ -58,11 +58,11 @@ df = crossjoin(df_j, df_ϕ, df_s);
 df[!, :w] = weight.(df[!, :j], df[!, :s], df[!, :ϕ]);
 df[!, :s] = string.(df[!, :s]);
 df[!, :ϕ] = string.(df[!, :ϕ]);
-df[!, :ϕ] = LaTeXString.("φ(x) = " .* df[!, :ϕ]);
+df[!, :ϕ] = LaTeXString.(L"\varphi(x_i \cdot β) = " .* df[!, :ϕ]);
 plt = data(df) *
     visual(Lines) *
     mapping(:j, :w, col = :ϕ, color = :s)
 axis = (xlabel = L"j", ylabel = L"w_j(x)", color = L"s");
 fg = draw(plt; axis, figure = (resolution = (900, 450), px_per_unit = 8))
 fg
-save("fig-01.pdf", fg, px_per_unit = 3)
+save("figures/final/lineplot-dgsb-weights.svg", fg, px_per_unit = 3)

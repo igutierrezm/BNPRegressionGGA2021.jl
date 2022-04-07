@@ -11,7 +11,7 @@ df <-
     ) |>
     dplyr::mutate(
         w = 1 / j * choose(j + s - 2, j - 1) * p^s * (1 - p)^(j - 1) * Re(hypergeo(j + s - 1, 1, j + 1, 1 - p)),
-        p_str = paste0("$\\varphi(\\bm{x}_i) = ", p, "$"),
+        p_str = paste0("$\\varphi(\\bm{x}_i \\cdot \\beta) = ", p, "$"),
         s_str = as.character(s)
     )
 

@@ -40,7 +40,7 @@ best_gamma <- fit_summary$which[kstar, ]
 # Helper functions -------------------------------------------------------------
 
 function run_experiment_bnp(dy; N0, Nrep, Niter, id, filename)
-    Random.seed!(3) # seed
+    Random.seed!(1) # seed
     samples = [generate_sample(dy; N0, Nrep) for _ in 1:Niter] # data
     gammas = [get_gamma_bnp(samples[id]) for id in 1:Niter] # map gamma
     reduced_gammas = reduce_gammas(gammas) # reduced df
@@ -51,7 +51,7 @@ function run_experiment_bnp(dy; N0, Nrep, Niter, id, filename)
 end
 
 function run_experiment_freq(dy; N0, Nrep, Niter, id, filename)
-    Random.seed!(3) # seed
+    Random.seed!(1) # seed
     samples = [generate_sample(dy; N0, Nrep) for _ in 1:Niter] # data
     gammas = [get_gamma_freq(samples[id]) for id in 1:Niter] # map gamma
     reduced_gammas = reduce_gammas(gammas) # reduced df
@@ -157,84 +157,84 @@ end
 
 # Experiment 1, N0 = 50 (bnp)
 begin 
-    dy(x) = Normal(0.6x, 1)
+    dy(x) = Normal(x, 1)
     filename = "data/final/regression-gamma-normal-bnp-50.csv"
     run_experiment_bnp(dy; N0 = 50, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 50 (freq)
 begin 
-    dy(x) = Normal(0.6x, 1)
+    dy(x) = Normal(x, 1)
     filename = "data/final/regression-gamma-normal-freq-50.csv"
     run_experiment_freq(dy; N0 = 50, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 100 (bnp)
 begin 
-    dy(x) = Normal(0.6x, 1)
+    dy(x) = Normal(x, 1)
     filename = "data/final/regression-gamma-normal-bnp-100.csv"
     run_experiment_bnp(dy; N0 = 100, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 100 (freq)
 begin 
-    dy(x) = Normal(0.6x, 1)
+    dy(x) = Normal(x, 1)
     filename = "data/final/regression-gamma-normal-freq-100.csv"
     run_experiment_freq(dy; N0 = 100, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 200 (bnp)
 begin 
-    dy(x) = Normal(0.6x, 1)
+    dy(x) = Normal(x, 1)
     filename = "data/final/regression-gamma-normal-bnp-200.csv"
     run_experiment_bnp(dy; N0 = 200, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 200 (freq)
 begin 
-    dy(x) = Normal(0.6x, 1)
+    dy(x) = Normal(x, 1)
     filename = "data/final/regression-gamma-normal-freq-200.csv"
     run_experiment_freq(dy; N0 = 200, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 2, N0 = 50 (bnp)
 begin 
-    dy(x) = SkewNormal(0.6x, 1.5, 4)
+    dy(x) = SkewNormal(x, 1.5, 4)
     filename = "data/final/regression-gamma-skewnormal-bnp-50.csv"
     run_experiment_bnp(dy; N0 = 50, Nrep = 5, Niter = 100, id = 2, filename)
 end 
 
 # Experiment 2, N0 = 50 (freq)
 begin 
-    dy(x) = SkewNormal(0.6x, 1.5, 4)
+    dy(x) = SkewNormal(x, 1.5, 4)
     filename = "data/final/regression-gamma-skewnormal-freq-50.csv"
     run_experiment_freq(dy; N0 = 50, Nrep = 5, Niter = 100, id = 2, filename)
 end 
 
 # Experiment 2, N0 = 100 (bnp)
 begin 
-    dy(x) = SkewNormal(0.6x, 1.5, 4)
+    dy(x) = SkewNormal(x, 1.5, 4)
     filename = "data/final/regression-gamma-skewnormal-bnp-100.csv"
     run_experiment_bnp(dy; N0 = 100, Nrep = 5, Niter = 100, id = 2, filename)
 end 
 
 # Experiment 2, N0 = 100 (freq)
 begin 
-    dy(x) = SkewNormal(0.6x, 1.5, 4)
+    dy(x) = SkewNormal(x, 1.5, 4)
     filename = "data/final/regression-gamma-skewnormal-freq-100.csv"
     run_experiment_freq(dy; N0 = 100, Nrep = 5, Niter = 100, id = 2, filename)
 end 
 
 # Experiment 2, N0 = 200 (bnp)
 begin 
-    dy(x) = SkewNormal(0.6x, 1.5, 4)
+    dy(x) = SkewNormal(x, 1.5, 4)
     filename = "data/final/regression-gamma-skewnormal-bnp-200.csv"
     run_experiment_bnp(dy; N0 = 200, Nrep = 5, Niter = 100, id = 2, filename)
 end 
 
 # Experiment 2, N0 = 200 (freq)
 begin 
-    dy(x) = SkewNormal(0.6x, 1.5, 4)
+    dy(x) = SkewNormal(x, 1.5, 4)
     filename = "data/final/regression-gamma-skewnormal-freq-200.csv"
     run_experiment_freq(dy; N0 = 200, Nrep = 5, Niter = 100, id = 2, filename)
 end 
@@ -265,6 +265,7 @@ p <-
     ) |>
     ggplot2::ggplot(ggplot2::aes(y = gamma, x = N, fill = frequency)) +
     ggplot2::geom_tile(color = "grey90") +
+    ggplot2::geom_text(ggplot2::aes(label = frequency)) +
     ggplot2::facet_grid(
         distribution ~ method, 
         labeller = ggplot2::labeller(

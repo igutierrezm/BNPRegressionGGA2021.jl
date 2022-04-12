@@ -64,7 +64,8 @@ end
 function generate_sample(dy; N0 = 50, Nrep = 10)
     # Simulate the data
     x0 = repeat(LinRange(-2, 2, N0 ÷ Nrep), Nrep)
-    y0 = @. rand(dy(x0))
+    X0d = rand([0, 1], length(x0), 4)
+    y0 = @. rand(dy(x0, X0d[:, 1]))
 
     # Generate the grid
     N1 = 0
@@ -95,7 +96,6 @@ function generate_sample(dy; N0 = 50, Nrep = 10)
     y0 = (y0 .- my0) ./ sy0
 
     # Add a constant term to the design matrices
-    X0d = rand([0, 1], size(X0, 1), 4)
     X0d = ((X0d .- mean(X0d, dims = 1)) ./ std(X0d, dims = 1))
     X0 = [ones(size(X0, 1)) X0 X0d]
     X1 = zeros(0, size(X0, 2))
@@ -157,84 +157,84 @@ end
 
 # Experiment 1, N0 = 50 (bnp)
 begin 
-    dy(x) = Normal(x, 1)
+    dy(x1, x2) = Normal(x1 + x2, 1)
     filename = "data/final/regression-gamma-normal-bnp-50.csv"
     run_experiment_bnp(dy; N0 = 50, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 50 (freq)
 begin 
-    dy(x) = Normal(x, 1)
+    dy(x1, x2) = Normal(x1 + x2, 1)
     filename = "data/final/regression-gamma-normal-freq-50.csv"
     run_experiment_freq(dy; N0 = 50, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 100 (bnp)
 begin 
-    dy(x) = Normal(x, 1)
+    dy(x1, x2) = Normal(x1 + x2, 1)
     filename = "data/final/regression-gamma-normal-bnp-100.csv"
     run_experiment_bnp(dy; N0 = 100, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 100 (freq)
 begin 
-    dy(x) = Normal(x, 1)
+    dy(x1, x2) = Normal(x1 + x2, 1)
     filename = "data/final/regression-gamma-normal-freq-100.csv"
     run_experiment_freq(dy; N0 = 100, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 200 (bnp)
 begin 
-    dy(x) = Normal(x, 1)
+    dy(x1, x2) = Normal(x1 + x2, 1)
     filename = "data/final/regression-gamma-normal-bnp-200.csv"
     run_experiment_bnp(dy; N0 = 200, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 200 (freq)
 begin 
-    dy(x) = Normal(x, 1)
+    dy(x1, x2) = Normal(x1 + x2, 1)
     filename = "data/final/regression-gamma-normal-freq-200.csv"
     run_experiment_freq(dy; N0 = 200, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 2, N0 = 50 (bnp)
 begin 
-    dy(x) = SkewNormal(x, 1.5, 4)
+    dy(x1, x2) = SkewNormal(x1 + x2, 1.5, 4)
     filename = "data/final/regression-gamma-skewnormal-bnp-50.csv"
     run_experiment_bnp(dy; N0 = 50, Nrep = 5, Niter = 100, id = 2, filename)
 end 
 
 # Experiment 2, N0 = 50 (freq)
 begin 
-    dy(x) = SkewNormal(x, 1.5, 4)
+    dy(x1, x2) = SkewNormal(x1 + x2, 1.5, 4)
     filename = "data/final/regression-gamma-skewnormal-freq-50.csv"
     run_experiment_freq(dy; N0 = 50, Nrep = 5, Niter = 100, id = 2, filename)
 end 
 
 # Experiment 2, N0 = 100 (bnp)
 begin 
-    dy(x) = SkewNormal(x, 1.5, 4)
+    dy(x1, x2) = SkewNormal(x1 + x2, 1.5, 4)
     filename = "data/final/regression-gamma-skewnormal-bnp-100.csv"
     run_experiment_bnp(dy; N0 = 100, Nrep = 5, Niter = 100, id = 2, filename)
 end 
 
 # Experiment 2, N0 = 100 (freq)
 begin 
-    dy(x) = SkewNormal(x, 1.5, 4)
+    dy(x1, x2) = SkewNormal(x1 + x2, 1.5, 4)
     filename = "data/final/regression-gamma-skewnormal-freq-100.csv"
     run_experiment_freq(dy; N0 = 100, Nrep = 5, Niter = 100, id = 2, filename)
 end 
 
 # Experiment 2, N0 = 200 (bnp)
 begin 
-    dy(x) = SkewNormal(x, 1.5, 4)
+    dy(x1, x2) = SkewNormal(x1 + x2, 1.5, 4)
     filename = "data/final/regression-gamma-skewnormal-bnp-200.csv"
     run_experiment_bnp(dy; N0 = 200, Nrep = 5, Niter = 100, id = 2, filename)
 end 
 
 # Experiment 2, N0 = 200 (freq)
 begin 
-    dy(x) = SkewNormal(x, 1.5, 4)
+    dy(x1, x2) = SkewNormal(x1 + x2, 1.5, 4)
     filename = "data/final/regression-gamma-skewnormal-freq-200.csv"
     run_experiment_freq(dy; N0 = 200, Nrep = 5, Niter = 100, id = 2, filename)
 end 
@@ -280,5 +280,5 @@ p <-
         x = "N (sample size)",
         y = "gamma (hypothesis vector), as a string of 0s and 1s"
     )
-ggplot2::ggsave("figures/final/heatmap-regression.png")
+ggplot2::ggsave("figures/final/heatmap-regression-zeta-1div4.png")
 """

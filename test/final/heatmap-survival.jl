@@ -224,6 +224,7 @@ p <-
     ) |>
     ggplot2::ggplot(ggplot2::aes(y = gamma, x = N, fill = frequency)) +
     ggplot2::geom_tile(color = "grey90") +
+    ggplot2::geom_text(ggplot2::aes(label = frequency), color = "red") +
     ggplot2::facet_grid(
         distribution ~ method, 
         labeller = ggplot2::labeller(

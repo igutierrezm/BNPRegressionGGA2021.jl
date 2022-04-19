@@ -5,7 +5,7 @@ Base.@kwdef struct DGSBPNormalDependent <: AbstractModel
     y1::Vector{Float64}
     X1::Matrix{Float64}
     mapping::Vector{Vector{Int}} = [[i] for i in 1:size(X0, 2)]
-    update_g::Vector{Bool} = ones(Bool, size(X0, 2))
+    update_g::Vector{Bool} = ones(Bool, length(mapping))
     event0::Vector{Bool} = ones(length(y0))
     # Transformed data
     D0::Int = size(X0, 2)
@@ -109,40 +109,88 @@ function update_g!(m::DGSBPNormalDependent)
     end
     pg = Womack(length(g), ζ0g)
     update_suffstats!(m)
-    for d in 1:length(g)
-        update_g[d] || continue
-        logodds = 0.0
-        for val in 0:1
-            g[d] = val
-            gexp[mapping[d]] .= val
-            # Find the posterior hyperparameters related to the atoms
-            logQ = 0.0
-            for j in 1:rmax(skl)
-                B1_b = inv((Symmetric(XX[j], :L) + inv(B0_b) + √eps(Float64) * I(D0))[gexp, gexp])
-                m1_b = B1_b * (Xy[j] + B0_b \ m0_b)[gexp]
-                a1_τ = a0_τ + n[j] / 2
-                b1_τ = b0_τ + (yy[j] + m0_b ⋅ (B0_b \ m0_b) - m1_b ⋅ (B1_b \ m1_b)) / 2
-                logQ += (
-                    0.5 * logdet(B1_b) -
-                    0.5 * logdet(B0_b) + 
-                    loggamma(a1_τ / 2) -
-                    loggamma(a0_τ / 2) + 
-                    (a0_τ / 2) * log(b0_τ) -
-                    (a1_τ / 2) * log(b1_τ) -
-                    (n[j] / 2) * log(2 * π)
-                )
-            end
-            # Compute the contribution to the logodds
-            m1, Σ1 = BNB.posterior_hyperparameters(rmodel)
-            logodds += (-1)^(val + 1) * (
-                logQ + 
-                logpdf(pg, g) +
-                logpdf(MvNormal(μ0β[gexp], Σ0β[gexp, gexp]), zeros(sum(gexp))) -
-                logpdf(MvNormal(m1, Σ1), zeros(length(m1)))
+    # Old mechanism
+    # for d in 1:length(g)
+    #     update_g[d] || continue
+    #     logodds = 0.0
+    #     for val in 0:1
+    #         g[d] = val
+    #         gexp[mapping[d]] .= val
+    #         # Find the posterior hyperparameters related to the atoms
+    #         logQ = 0.0
+    #         for j in 1:rmax(skl)
+    #             B1_b = inv((Symmetric(XX[j], :L) + inv(B0_b) + √eps(Float64) * I(D0))[gexp, gexp])
+    #             m1_b = B1_b * (Xy[j] + B0_b \ m0_b)[gexp]
+    #             a1_τ = a0_τ + n[j] / 2
+    #             b1_τ = b0_τ + (yy[j] + m0_b ⋅ (B0_b \ m0_b) - m1_b ⋅ (B1_b \ m1_b)) / 2
+    #             logQ += (
+    #                 0.5 * logdet(B1_b) -
+    #                 0.5 * logdet(B0_b) + 
+    #                 loggamma(a1_τ / 2) -
+    #                 loggamma(a0_τ / 2) + 
+    #                 (a0_τ / 2) * log(b0_τ) -
+    #                 (a1_τ / 2) * log(b1_τ) -
+    #                 (n[j] / 2) * log(2 * π)
+    #             )
+    #         end
+    #         # Compute the contribution to the logodds
+    #         m1, Σ1 = BNB.posterior_hyperparameters(rmodel)
+    #         logodds += (-1)^(val + 1) * (
+    #             logQ + 
+    #             logpdf(pg, g) +
+    #             logpdf(MvNormal(μ0β[gexp], Σ0β[gexp, gexp]), zeros(sum(gexp))) -
+    #             logpdf(MvNormal(m1, Σ1), zeros(length(m1)))
+    #         )
+    #     end
+    #     g[d] = rand() < exp(logodds) / (1.0 + exp(logodds))
+    #     gexp[mapping[d]] .= g[d]
+    # end
+    # return nothing
+
+    # New mechanism ------------------------------
+
+    # Select the component to be updated
+    updateable = (1:length(g))[update_g]
+    d = rand(updateable)
+    gd_old = g[d]
+
+    # Compute the log-odds
+    logodds = 0.0
+    for val in 0:1
+        g[d] = val
+        gexp[mapping[d]] .= val
+        # Find the posterior hyperparameters related to the atoms
+        logQ = 0.0
+        for j in 1:rmax(skl)
+            B1_b = inv((Symmetric(XX[j], :L) + inv(B0_b) + √eps(Float64) * I(D0))[gexp, gexp])
+            m1_b = B1_b * (Xy[j] + B0_b \ m0_b)[gexp]
+            a1_τ = a0_τ + n[j] / 2
+            b1_τ = b0_τ + (yy[j] + m0_b ⋅ (B0_b \ m0_b) - m1_b ⋅ (B1_b \ m1_b)) / 2
+            logQ += (
+                0.5 * logdet(B1_b) -
+                0.5 * logdet(B0_b) + 
+                loggamma(a1_τ / 2) -
+                loggamma(a0_τ / 2) + 
+                (a0_τ / 2) * log(b0_τ) -
+                (a1_τ / 2) * log(b1_τ) -
+                (n[j] / 2) * log(2 * π)
             )
         end
-        g[d] = rand() < exp(logodds) / (1.0 + exp(logodds))
-        gexp[mapping[d]] .= g[d]
+        # Compute the contribution to the logodds
+        m1, Σ1 = BNB.posterior_hyperparameters(rmodel)
+        logodds += (-1)^(val + 1) * (
+            logQ + 
+            logpdf(pg, g) +
+            logpdf(MvNormal(μ0β[gexp], Σ0β[gexp, gexp]), zeros(sum(gexp))) -
+            logpdf(MvNormal(m1, Σ1), zeros(length(m1)))
+        )
     end
+
+    # Compute the acceptance probability
+    ap = gd_old == false ? exp(logodds) : exp(-logodds)
+
+    # Update g[d] using a MH step 
+    g[d] = rand() < ap ? !gd_old : gd_old
+    gexp[mapping[d]] .= g[d]
     return nothing
 end

@@ -158,44 +158,44 @@ end
 
 # Experiment 1, N0 = 50 (bnp)
 begin 
-    dy(x) = LogGamma(4x, 1)
+    dy(x) = LogGamma(5x, 1)
     filename = "data/final/survival-gamma-loggamma-bnp-50.csv"
-    run_experiment_bnp(dy; N0 = 50, Nrep = 5, Niter = 100, id = 1, filename)
+    run_experiment_bnp(dy; N0 = 50, Nrep = 5, Niter = 10, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 50 (freq)
 begin 
-    dy(x) = LogGamma(4x, 1)
+    dy(x) = LogGamma(5x, 1)
     filename = "data/final/survival-gamma-loggamma-freq-50.csv"
-    run_experiment_freq(dy; N0 = 50, Nrep = 5, Niter = 100, id = 1, filename)
+    run_experiment_freq(dy; N0 = 50, Nrep = 5, Niter = 10, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 100 (bnp)
 begin 
-    dy(x) = LogGamma(4x, 1)
+    dy(x) = LogGamma(5x, 1)
     filename = "data/final/survival-gamma-loggamma-bnp-100.csv"
-    run_experiment_bnp(dy; N0 = 100, Nrep = 5, Niter = 100, id = 1, filename)
+    run_experiment_bnp(dy; N0 = 100, Nrep = 5, Niter = 10, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 100 (freq)
 begin 
     dy(x) = LogNormal(x, 1)
     filename = "data/final/survival-gamma-loggamma-freq-100.csv"
-    run_experiment_freq(dy; N0 = 100, Nrep = 5, Niter = 100, id = 1, filename)
+    run_experiment_freq(dy; N0 = 100, Nrep = 5, Niter = 10, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 200 (bnp)
 begin 
-    dy(x) = LogGamma(4x, 1)
+    dy(x) = LogGamma(5x, 1)
     filename = "data/final/survival-gamma-loggamma-bnp-200.csv"
-    run_experiment_bnp(dy; N0 = 200, Nrep = 5, Niter = 100, id = 1, filename)
+    run_experiment_bnp(dy; N0 = 200, Nrep = 5, Niter = 10, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 200 (freq)
 begin 
-    dy(x) = LogGamma(4x, 1)
+    dy(x) = LogGamma(5x, 1)
     filename = "data/final/survival-gamma-loggamma-freq-200.csv"
-    run_experiment_freq(dy; N0 = 200, Nrep = 5, Niter = 100, id = 1, filename)
+    run_experiment_freq(dy; N0 = 200, Nrep = 5, Niter = 10, id = 1, filename)
 end 
 
 # Summary of the results

@@ -15,7 +15,7 @@ Base.@kwdef struct DGSBPNormalDependent <: AbstractModel
     m0_b::Vector{Float64} = zeros(D0)
     a0_τ::Float64 = 0.1
     b0_τ::Float64 = 0.1
-    ζ0g::Float64 = 1 / 4
+    ζ0g::Float64 = 1 / 3
     # Parameters
     b::Vector{Vector{Float64}} = [zeros(D0)]
     τ::Vector{Float64} = [1.0]

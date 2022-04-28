@@ -1,17 +1,20 @@
 function sample!(m::AbstractModel; mcmcsize = 4000, burnin = mcmcsize ÷ 2, thin = 1)
-    (; f, g, β) = skeleton(m)
+    (; d, f, g, β) = skeleton(m)
     chainf = [zeros(length(f)) for _ in 1:(mcmcsize - burnin) ÷ thin]
     chaing = [zeros(length(g)) for _ in 1:(mcmcsize - burnin) ÷ thin]
     chainβ = [zeros(length(β)) for _ in 1:(mcmcsize - burnin) ÷ thin]
+    chainnclus = [0 for _ in 1:(mcmcsize - burnin) ÷ thin]
     for iter in 1:mcmcsize
         step!(m)
         if iter > burnin && iszero((iter - burnin) % thin)
-            chainf[(iter - burnin) ÷ thin] .= f
-            chaing[(iter - burnin) ÷ thin] .= g
-            chainβ[(iter - burnin) ÷ thin] .= β
+            row = (iter - burnin) ÷ thin
+            chainf[row] .= f
+            chaing[row] .= g
+            chainβ[row] .= β
+            chainnclus[row] = length(unique(d))
         end
     end
-    return chainf, chainβ, chaing
+    return chainf, chainβ, chaing, chainnclus
 end
 
 function step!(m::AbstractModel)

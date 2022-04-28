@@ -6,6 +6,7 @@ using HypergeometricFunctions
 using LinearAlgebra
 using Random
 using SpecialFunctions
+using StatsBase: mean_and_std
 using Walker2020Sampling
 import Distributions: pdf, logpdf
 

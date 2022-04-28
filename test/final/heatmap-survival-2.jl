@@ -38,7 +38,7 @@ function generate_sample(dy; N0 = 50, Nrep = 10)
     X0d = rand([0, 1], N0, 4)
     x0 = repeat(LinRange(-2, 2, N0 ÷ Nrep), Nrep)
     y0 = @. rand(dy(X0d[:, 4]))
-    event0 = y0 .< 4
+    event0 = y0 .< 5
 
     # Generate the grid
     N1 = 0
@@ -141,44 +141,43 @@ end
 # Experiment 1, N0 = 50 (bnp)
 begin 
     filename = "data/final/survival-gamma-loggamma-bnp-50.csv"
-    # dy(x) = MixtureModel(Normal, [(3 + x, 0.8 + 0.2x), (3 - x, 0.8)], [.4, .6])
-    dy(x) = Normal(3 + x, 1)
-    run_experiment_bnp(dy; N0 = 50, Nrep = 5, Niter = 10, id = 1, filename)
+    dy(x) = MixtureModel(Normal, [(3 + x, 0.8 + 0.2x), (3 - x, 0.8)], [.4, .6])
+    run_experiment_bnp(dy; N0 = 50, Nrep = 5, Niter = 4000, id = 1, filename)
 end
 
 # Experiment 1, N0 = 50 (freq)
 begin 
     filename = "data/final/survival-gamma-loggamma-freq-50.csv"
     dy(x) = MixtureModel(Normal, [(3 + x, 0.8 + 0.2x), (3 - x, 0.8)], [.4, .6])
-    run_experiment_freq(dy; N0 = 50, Nrep = 5, Niter = 1000, id = 1, filename)
+    run_experiment_freq(dy; N0 = 50, Nrep = 5, Niter = 4000, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 100 (bnp)
 begin 
     filename = "data/final/survival-gamma-loggamma-bnp-100.csv"
     dy(x) = MixtureModel(Normal, [(3 + x, 0.8 + 0.2x), (3 - x, 0.8)], [.4, .6])
-    run_experiment_bnp(dy; N0 = 100, Nrep = 5, Niter = 10, id = 1, filename)
+    run_experiment_bnp(dy; N0 = 100, Nrep = 5, Niter = 4000, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 100 (freq)
 begin 
     filename = "data/final/survival-gamma-loggamma-freq-100.csv"
     dy(x) = MixtureModel(Normal, [(3 + x, 0.8 + 0.2x), (3 - x, 0.8)], [.4, .6])
-    run_experiment_freq(dy; N0 = 100, Nrep = 5, Niter = 1000, id = 1, filename)
+    run_experiment_freq(dy; N0 = 100, Nrep = 5, Niter = 4000, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 200 (bnp)
 begin 
     filename = "data/final/survival-gamma-loggamma-bnp-200.csv"
     dy(x) = MixtureModel(Normal, [(3 + x, 0.8 + 0.2x), (3 - x, 0.8)], [.4, .6])
-    run_experiment_bnp(dy; N0 = 200, Nrep = 5, Niter = 10, id = 1, filename)
+    run_experiment_bnp(dy; N0 = 200, Nrep = 5, Niter = 4000, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 200 (freq)
 begin 
     filename = "data/final/survival-gamma-loggamma-freq-200.csv"
     dy(x) = MixtureModel(Normal, [(3 + x, 0.8 + 0.2x), (3 - x, 0.8)], [.4, .6])
-    run_experiment_freq(dy; N0 = 200, Nrep = 5, Niter = 1000, id = 1, filename)
+    run_experiment_freq(dy; N0 = 200, Nrep = 5, Niter = 4000, id = 1, filename)
 end 
 
 # Summary of the results

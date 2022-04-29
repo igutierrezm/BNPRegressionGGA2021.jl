@@ -91,7 +91,7 @@ function update_y!(m::DGSBPNormalDependent)
     (; b, event0, skl, ỹ0, τ) = m
     (; d, N0, X0vec, y0) = skl
     m, s = mean_and_std(ỹ0)
-    ub = 1.5 * maximum(ỹ0)
+    ub = 2 * maximum(ỹ0)
     for i in 1:N0
         if !event0[i]
             dist = Normal(b[d[i]] ⋅ X0vec[i], 1 / √τ[d[i]])

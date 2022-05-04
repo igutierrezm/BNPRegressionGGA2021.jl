@@ -150,7 +150,7 @@ begin
     filename = "data/final/survival-gamma-loggamma-bnp-50.csv"
     dy(x) = MixtureModel(Normal, [(3 + x, 0.8 + 0.2x), (3 - x, 0.8)], [.4, .6])
     # dy(x) = Normal(2 + x, 1)
-    y0, event0, y1, X0, X1, x1c, f1, mapping = generate_sample(dy; N0 = 200, N1 = 50, Nrep = 10)
+    y0, event0, y1, X0, X1, x1c, f1, mapping = generate_sample(dy; N0 = 1000, N1 = 50, Nrep = 10)
     smpl = BNP.DGSBPNormalDependent(; y0, event0, X0, y1, X1, mapping)
     chainf, chainβ, chaing, chainnclus = BNP.sample!(smpl; mcmcsize = 10000)
     println(mean(chainnclus))

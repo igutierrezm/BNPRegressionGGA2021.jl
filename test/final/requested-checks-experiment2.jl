@@ -37,14 +37,16 @@ function generate_sample(dy; N0, N1, Nrep = 10)
     x1d2 = grid[!, :x1d2]
     X1d = [x1d1 x1d2]
     
-    # Expand x0-x1 using splines
-    R"""
-    x0cmin <- min($x0c)
-    x0cmax <- max($x0c)
-    X0c <- splines::bs($x0c, df = 6, Boundary.knots = c(x0cmin, x0cmax))
-    X1c <- predict(X0c, $x1c)  
-    """
-    @rget X0c X1c
+    # # Expand x0-x1 using splines
+    # R"""
+    # x0cmin <- min($x0c)
+    # x0cmax <- max($x0c)
+    # X0c <- splines::bs($x0c, df = 6, Boundary.knots = c(x0cmin, x0cmax))
+    # X1c <- predict(X0c, $x1c)  
+    # """
+    # @rget X0c X1c
+    X0c = x0c[:, :]
+    X1c = Float64.(x1c[:, :])
 
     # Standardise responses and predictors
     mX0c, sX0c = mean_and_std(X0c, 1)
@@ -65,7 +67,7 @@ function generate_sample(dy; N0, N1, Nrep = 10)
     f1 = pdf.(dy.(x1c, x1d2), my0 .+ y1 .* sy0) .* sy0
 
     # Set the mapping 
-    mapping = [[1], collect(2:7), [8], [9]]
+    mapping = [[1], [2], [3], [4]]
 
     # Return the preprocessed results
     return y0, event0, y1, X0, X1, x1c, f1, mapping

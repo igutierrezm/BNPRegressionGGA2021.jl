@@ -15,14 +15,14 @@ Base.@kwdef struct DGSBPNormalDependent <: AbstractModel
     m0_b::Vector{Float64} = zeros(D0)
     a0_τ::Float64 = 0.1
     b0_τ::Float64 = 0.1
-    ζ0g::Float64 = 1 / 3
+    ζ0g::Float64 = 1.0
     # Parameters
     b::Vector{Vector{Float64}} = [zeros(D0)]
     τ::Vector{Float64} = [1.0]
     # Transformed parameters
     XX::Vector{Matrix{Float64}} = [zeros(D0, D0)]
     Xy::Vector{Vector{Float64}} = [zeros(D0)]
-    yy::Vector{Float64} = [0.0]    
+    yy::Vector{Float64} = [0.0]
     # Skeleton
     skl::Skeleton = Skeleton(; y0, y1, X0, X1, ζ0g, mapping, update_g)
 end

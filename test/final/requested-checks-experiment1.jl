@@ -83,7 +83,7 @@ begin
     end
     # Generate the sample
     y0, event0, y1, X0, X1, x1c, f1, mapping = 
-        generate_sample(dy; N0 = 5000, N1 = 50, Nrep = 10)
+        generate_sample(dy; N0 = 500, N1 = 50, Nrep = 10)
 
     # Fit the model
     smpl = BNP.DGSBPNormalDependent(; y0, event0, X0, y1, X1, mapping)

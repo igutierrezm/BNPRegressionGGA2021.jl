@@ -265,9 +265,9 @@ ggplot2::ggsave("figures/final/heatmap-survival.png")
 """
 
 # TODO:
-# Save the number of clusters in each iteration
+# Save the number of clusters in each iteration (done)
 # Try a model with 3 variables and examine the results
-# Plot the density marginal and conditional
+# Plot the density marginal and conditional 
 # Save the posterior and prior probability of each gamma
 # From time to time in the Gibbs, draw a gamma completely at random
 # Do the following experiment: What happens if N = 50 and the the true hypotehesis is (1,...,1)?

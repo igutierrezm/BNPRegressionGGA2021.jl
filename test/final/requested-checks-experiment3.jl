@@ -20,7 +20,7 @@ function generate_sample(dy; N0, N1, Nrep = 10)
     # Simulate the data
     X0d = rand([0, 1], N0, 2) 
     x0c = repeat(LinRange(-2, 2, N0 ÷ Nrep), Nrep)
-    y0 = @. rand(dy(x0c, X0d[:, 2]))
+    y0 = @. rand(dy(x0c, X0d[:, 1], X0d[:, 2]))
     event0 = y0 .< 5
 
     # Generate the grid
@@ -62,7 +62,7 @@ function generate_sample(dy; N0, N1, Nrep = 10)
     X1 = [ones(size(X1c, 1)) X1c X1d]
 
     # Generate the true (standardized) density over the grid
-    f1 = pdf.(dy.(x1c, x1d2), my0 .+ y1 .* sy0) .* sy0
+    f1 = pdf.(dy.(x1c, x1d1, x1d2), my0 .+ y1 .* sy0) .* sy0
 
     # Set the mapping 
     mapping = [[1], collect(2:7), [8], [9]]
@@ -71,13 +71,13 @@ function generate_sample(dy; N0, N1, Nrep = 10)
     return y0, event0, y1, X0, X1, x1c, f1, mapping
 end;
 
-# First experiment: 1 relevant variable
+# Third experiment: 3 relevant variables
 begin 
     # Set the seed
     Random.seed!(1) 
     # Set the true conditional distribution
-    function dy(xc, xd)
-        atoms = [(3 + xd, 0.8 + 0.2xd), (3 - xd, 0.8)]
+    function dy(xc, xd1, xd2)
+        atoms = [(3 + xc + xd1 + xd2, 0.8), (3 - xd1 - xd2, 0.8)]
         weights = [.4, .6]
         MixtureModel(Normal, atoms, weights)
     end
@@ -106,7 +106,7 @@ data.frame(
     ) %>%
     ggplot2::ggplot(ggplot2::aes(x = y0, color = factor(x0d2))) +
     ggplot2::geom_histogram()
-    ggplot2::ggsave("tmp1_1.png")
+    ggplot2::ggsave("tmp3_1.png")
 """
 
 # Save the simulation results in a format amenable for later plots
@@ -148,7 +148,7 @@ p <-
         )
     ) +
     ggplot2::geom_line()
-ggplot2::ggsave("tmp1_2.png")
+ggplot2::ggsave("tmp3_2.png")
 """
 
 # Plot the true and the fitted density, according to our method
@@ -170,13 +170,5 @@ p <-
     ) +
     ggplot2::geom_line() +
     ggplot2::facet_grid(rows = ggplot2::vars(gamma))
-ggplot2::ggsave("tmp1_3.png")
+ggplot2::ggsave("tmp3_3.png")
 """
-
-# TODO:
-# Save the number of clusters in each iteration (done)
-# Try a model with 3 variables and examine the results (done)
-# Plot the density marginal and conditional (done)
-# Save the posterior and prior probability of each gamma
-# From time to time in the Gibbs, draw a gamma completely at random (done)
-# Do the following experiment: What happens if N = 50 and the the true hypotehesis is (1,...,1)?

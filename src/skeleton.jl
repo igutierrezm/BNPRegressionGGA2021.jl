@@ -14,7 +14,7 @@ Base.@kwdef struct Skeleton
     X0vec::Vector{Vector{Float64}} = [X0[i, :] for i in 1:N0]
     X1vec::Vector{Vector{Float64}} = [X1[i, :] for i in 1:N1]
     # HyperParameters
-    ζ0g::Float64 = 0.1
+    ζ0g::Float64 = 1.0
     m0β::Vector{Float64} = zeros(D0)
     Σ0β::Matrix{Float64} = Matrix(9.0 * I(D0))
     # Parameters

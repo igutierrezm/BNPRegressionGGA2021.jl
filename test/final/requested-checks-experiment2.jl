@@ -18,36 +18,33 @@ end;
 # Generate a sample ready for our estimation procedure
 function generate_sample(dy; N0, N1, Nrep = 10)
     # Simulate the data
-    X0d = rand([0, 1], N0, 2) 
+    X0d = rand([0, 1], N0, 4) 
     x0c = repeat(LinRange(-2, 2, N0 ÷ Nrep), Nrep)
-    y0 = @. rand(dy(x0c, X0d[:, 2]))
+    y0 = @. rand(dy(x0c, X0d[:, 4]))
     event0 = y0 .< 5
 
     # Generate the grid
     y1 = LinRange(-3, 3, N1) |> collect
     x1d1 = [0, 1]
     x1d2 = [0, 1]
+    x1d3 = [0, 1]
+    x1d4 = [0, 1]
     x1c = [0, 1]
 
     # Expand the grid
-    grid = rcopy(R"expand.grid(y1 = $y1, x1c = $x1c, x1d1 = $x1d1, x1d2 = $x1d2)")
+    grid = rcopy(R"expand.grid(y1 = $y1, x1c = $x1c, x1d1 = $x1d1, x1d2 = $x1d2, x1d3 = $x1d3, x1d4 = $x1d4)")
     y1 = grid[!, :y1]
     x1c = grid[!, :x1c]
     x1d1 = grid[!, :x1d1]
     x1d2 = grid[!, :x1d2]
-    X1d = [x1d1 x1d2]
+    x1d3 = grid[!, :x1d3]
+    x1d4 = grid[!, :x1d4]
+    X1d = [x1d1 x1d2 x1d3 x1d4]
     
-    # # Expand x0-x1 using splines
-    # R"""
-    # x0cmin <- min($x0c)
-    # x0cmax <- max($x0c)
-    # X0c <- splines::bs($x0c, df = 6, Boundary.knots = c(x0cmin, x0cmax))
-    # X1c <- predict(X0c, $x1c)  
-    # """
-    # @rget X0c X1c
+    # Convert x0c-x1c into matrices
     X0c = x0c[:, :]
     X1c = Float64.(x1c[:, :])
-
+ 
     # Standardise responses and predictors
     mX0c, sX0c = mean_and_std(X0c, 1)
     for col in 1:size(X0c, 2)
@@ -67,36 +64,42 @@ function generate_sample(dy; N0, N1, Nrep = 10)
     f1 = pdf.(dy.(x1c, x1d2), my0 .+ y1 .* sy0) .* sy0
 
     # Set the mapping 
-    mapping = [[1], [2], [3], [4]]
+    mapping = [[1], [2], [3], [4], [5], [6]]
 
     # Return the preprocessed results
-    return y0, event0, y1, X0, X1, x1c, f1, mapping
+    return event0, y0, y1, X0, X1, f1, mapping
 end;
 
 # Second experiment: 2 relevant variables
-begin 
-    # Set the seed
-    Random.seed!(1) 
-    # Set the true conditional distribution
-    function dy(xc, xd)
-        atoms = [(3 + xc + xd, 0.8 + 0.2xd), (3 - xd, 0.8)]
-        weights = [.4, .6]
-        MixtureModel(Normal, atoms, weights)
+chaing = begin 
+    for i in 1:2
+        # Set the seed
+        # Random.seed!(1) 
+        # Set the true conditional distribution
+        function dy(xc, xd)
+            atoms = [(3 + xc + xd, 0.8 + 0.2xd), (3 - xd, 0.8)]
+            weights = [.4, .6]
+            MixtureModel(Normal, atoms, weights)
+        end
+        # Generate the sample
+        event0, y0, y1, X0, X1, f1, mapping = 
+            generate_sample(dy; N0 = 500, N1 = 50, Nrep = 10)
+
+        # Fit the model
+        smpl = BNP.DGSBPNormalDependent(; y0, event0, X0, y1, X1, mapping)
+        chainf, chainβ, chaing, chainnclus = BNP.sample!(smpl; mcmcsize = 10000)
+        chaing = map(x -> join(Int.(x[2:6])), chaing)
+
+        # Print some summary statistics
+        # println(mean(chainnclus)) # average number of clusters
+        # println([mean_and_var(y0) maximum(y0)]) # mean/var of the responses
+        # println([mean_and_var(smpl.ỹ0) maximum(smpl.ỹ0)]) # mean/var of the responses
+        out = 
+            DataStructures.counter(chaing) |>
+            x -> Dict(x) |> 
+            x -> sort(x, byvalue = true, rev = true)
+        println(out) # freq table for gamma
     end
-    # Generate the sample
-    y0, event0, y1, X0, X1, x1c, f1, mapping = 
-        generate_sample(dy; N0 = 5000, N1 = 50, Nrep = 10)
-
-    # Fit the model
-    smpl = BNP.DGSBPNormalDependent(; y0, event0, X0, y1, X1, mapping)
-    chainf, chainβ, chaing, chainnclus = BNP.sample!(smpl; mcmcsize = 10000)
-    chaing = join.(map.(Int, chaing))
-
-    # Print some summary statistics
-    println(mean(chainnclus)) # average number of clusters
-    println([mean_and_var(y0) maximum(y0)]) # mean/var of the responses
-    println([mean_and_var(smpl.ỹ0) maximum(smpl.ỹ0)]) # mean/var of the responses
-    println(DataStructures.counter(chaing)) # freq table for gamma
 end
 
 # Plot a kdensity of the sample (ignoring the censoring)
@@ -104,7 +107,7 @@ R"""
 library(magrittr)
 data.frame(
         y0 = $y0,
-        x0d2 = $(X0[:, 9])
+        x0d2 = $(X0[:, 2])
     ) %>%
     ggplot2::ggplot(ggplot2::aes(x = y0, color = factor(x0d2))) +
     ggplot2::geom_histogram()
@@ -119,9 +122,9 @@ simulation_results <-
         $chainf,
         $chaing,
         ~ data.frame(
-            x1c1 = $x1c,
-            x1d1 = $(X1[:, 8]),
-            x1d2 = $(X1[:, 9]),
+            x1c1 = $(X1[:, 2]),
+            x1d1 = $(X1[:, 3]),
+            x1d2 = $(X1[:, 4]),
             y1 = $y1,
             f1 = $f1,
             fh = .x,

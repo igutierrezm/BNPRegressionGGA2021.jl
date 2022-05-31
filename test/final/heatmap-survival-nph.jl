@@ -124,61 +124,61 @@ end
 
 # Experiment 1, N0 = 50 (bnp)
 begin 
-    filename = "data/final/survival-gamma-loggamma-bnp-50.csv"
+    filename = "data/final/survival-gamma-nph-bnp-50.csv"
     run_experiment_bnp(dy; N0 = 50, Nrep = 5, Niter = 100, id = 1, filename)
 end
 
 # Experiment 1, N0 = 50 (freq)
 begin 
-    filename = "data/final/survival-gamma-loggamma-freq-50.csv"
+    filename = "data/final/survival-gamma-nph-freq-50.csv"
     run_experiment_freq(dy; N0 = 50, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 100 (bnp)
 begin 
-    filename = "data/final/survival-gamma-loggamma-bnp-100.csv"
+    filename = "data/final/survival-gamma-nph-bnp-100.csv"
     run_experiment_bnp(dy; N0 = 100, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 100 (freq)
 begin 
-    filename = "data/final/survival-gamma-loggamma-freq-100.csv"
+    filename = "data/final/survival-gamma-nph-freq-100.csv"
     run_experiment_freq(dy; N0 = 100, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 200 (bnp)
 begin 
-    filename = "data/final/survival-gamma-loggamma-bnp-200.csv"
+    filename = "data/final/survival-gamma-nph-bnp-200.csv"
     run_experiment_bnp(dy; N0 = 200, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 200 (freq)
 begin 
-    filename = "data/final/survival-gamma-loggamma-freq-200.csv"
+    filename = "data/final/survival-gamma-nph-freq-200.csv"
     run_experiment_freq(dy; N0 = 200, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 500 (bnp)
 begin 
-    filename = "data/final/survival-gamma-loggamma-bnp-500.csv"
+    filename = "data/final/survival-gamma-nph-bnp-500.csv"
     run_experiment_bnp(dy; N0 = 500, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 500 (freq)
 begin 
-    filename = "data/final/survival-gamma-loggamma-freq-500.csv"
+    filename = "data/final/survival-gamma-nph-freq-500.csv"
     run_experiment_freq(dy; N0 = 500, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 1000 (bnp)
 begin 
-    filename = "data/final/survival-gamma-loggamma-bnp-1000.csv"
+    filename = "data/final/survival-gamma-nph-bnp-1000.csv"
     run_experiment_bnp(dy; N0 = 1000, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 1000 (freq)
 begin 
-    filename = "data/final/survival-gamma-loggamma-freq-1000.csv"
+    filename = "data/final/survival-gamma-nph-freq-1000.csv"
     run_experiment_freq(dy; N0 = 1000, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
@@ -223,7 +223,7 @@ p <-
         x = "N (sample size)",
         y = "gamma (hypothesis vector), as a string of 0s and 1s"
     )
-ggplot2::ggsave("figures/final/heatmap-survival.png")
+ggplot2::ggsave("figures/final/heatmap-survival-nph.png")
 """
 
 # TODO:

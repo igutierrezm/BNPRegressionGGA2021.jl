@@ -192,10 +192,10 @@ data <-
     ) |>
     purrr::map(readr::read_csv, show_col_types = FALSE) |>
     dplyr::bind_rows() |>
-    dplyr::group_by(method, id, N0, g2, g3, g4, g5, g6) |>
+    dplyr::group_by(method, id, N0, g1, g2, g3, g4, g5, g6) |>
     dplyr::count(name = "frequency") |>
     dplyr::ungroup() |>
-    dplyr::mutate(gamma = paste0(g2, g3, g4, g5, g6)) |>
+    dplyr::mutate(gamma = paste0(g1, g2, g3, g4, g5, g6)) |>
     dplyr::select(gamma, frequency, id, method, N = N0)
 p <- 
     data |>

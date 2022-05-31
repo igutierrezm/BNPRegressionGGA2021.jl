@@ -37,7 +37,7 @@ end
 function generate_sample(dy; N0 = 50, Nrep = 10)
     # Simulate the data
     X0d = rand([0.0, 1.0], N0, 4)
-    X0c = repeat(LinRange(-2, 2, N0 ÷ Nrep), Nrep)
+    X0c = repeat(LinRange(-1, 1, N0 ÷ Nrep), Nrep)
     y0 = @. rand(dy(X0c, X0d[:, 4]))
     X0 = [X0c X0d]
     event0 = y0 .< 5
@@ -97,9 +97,9 @@ function get_gamma_freq(sample)
         names(fitted_bestmodel$coefficients) %>%
         gsub("x", "", .) %>%
         as.numeric()
-    best_gamma <- rep(FALSE, 6)
-    best_gamma[best_model_trues] <- TRUE
-    best_gamma[1] <- TRUE
+    best_gamma <- rep(0L, 6)
+    best_gamma[best_model_trues] <- 1L
+    best_gamma[1] <- 1L
     """
     @rget best_gamma
     return best_gamma
@@ -117,68 +117,66 @@ function reduce_gammas(gammas; method, id, N0)
 end
 
 function dy(xc, xd)
-    atoms = [(3 + xc + xd, 0.8 + 0.2xd), (3 - xd, 0.8)]
-    weights = [.4, .6]
-    MixtureModel(Normal, atoms, weights)
+    Weibull(2, 1.5 + xc + xd)
 end
 
 # Experiment 1, N0 = 50 (bnp)
 begin 
-    filename = "data/final/survival-gamma-nph-bnp-50.csv"
+    filename = "data/final/survival-gamma-ph-bnp-50.csv"
     run_experiment_bnp(dy; N0 = 50, Nrep = 5, Niter = 100, id = 1, filename)
 end
 
 # Experiment 1, N0 = 50 (freq)
 begin 
-    filename = "data/final/survival-gamma-nph-freq-50.csv"
+    filename = "data/final/survival-gamma-ph-freq-50.csv"
     run_experiment_freq(dy; N0 = 50, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 100 (bnp)
 begin 
-    filename = "data/final/survival-gamma-nph-bnp-100.csv"
+    filename = "data/final/survival-gamma-ph-bnp-100.csv"
     run_experiment_bnp(dy; N0 = 100, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 100 (freq)
 begin 
-    filename = "data/final/survival-gamma-nph-freq-100.csv"
+    filename = "data/final/survival-gamma-ph-freq-100.csv"
     run_experiment_freq(dy; N0 = 100, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 200 (bnp)
 begin 
-    filename = "data/final/survival-gamma-nph-bnp-200.csv"
+    filename = "data/final/survival-gamma-ph-bnp-200.csv"
     run_experiment_bnp(dy; N0 = 200, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 200 (freq)
 begin 
-    filename = "data/final/survival-gamma-nph-freq-200.csv"
+    filename = "data/final/survival-gamma-ph-freq-200.csv"
     run_experiment_freq(dy; N0 = 200, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 500 (bnp)
 begin 
-    filename = "data/final/survival-gamma-nph-bnp-500.csv"
+    filename = "data/final/survival-gamma-ph-bnp-500.csv"
     run_experiment_bnp(dy; N0 = 500, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 500 (freq)
 begin 
-    filename = "data/final/survival-gamma-nph-freq-500.csv"
+    filename = "data/final/survival-gamma-ph-freq-500.csv"
     run_experiment_freq(dy; N0 = 500, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 1000 (bnp)
 begin 
-    filename = "data/final/survival-gamma-nph-bnp-1000.csv"
+    filename = "data/final/survival-gamma-ph-bnp-1000.csv"
     run_experiment_bnp(dy; N0 = 1000, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
 # Experiment 1, N0 = 1000 (freq)
 begin 
-    filename = "data/final/survival-gamma-nph-freq-1000.csv"
+    filename = "data/final/survival-gamma-ph-freq-1000.csv"
     run_experiment_freq(dy; N0 = 1000, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
@@ -187,7 +185,7 @@ R"""
 data <- 
     list.files(
         path = "data/final", 
-        pattern = "survival-gamma-nph*", 
+        pattern = "survival-gamma-ph*", 
         full.names = TRUE
     ) |>
     purrr::map(readr::read_csv, show_col_types = FALSE) |>
@@ -223,7 +221,7 @@ p <-
         x = "N (sample size)",
         y = "gamma (hypothesis vector), as a string of 0s and 1s"
     )
-ggplot2::ggsave("figures/final/heatmap-survival-nph.png")
+ggplot2::ggsave("figures/final/heatmap-survival-ph.png")
 """
 
 # TODO:

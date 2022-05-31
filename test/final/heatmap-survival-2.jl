@@ -203,7 +203,7 @@ p <-
         method = method |>
             dplyr::recode(bnp = "BNP", freq = "Stepwise (AIC)"),
         distribution = id |>
-        dplyr::recode(`1` = "Normal", `2` = "Skew Normal"),
+        dplyr::recode(`1` = "Normal mixture"),
         N = factor(N, ordered = TRUE)
     ) |>
     ggplot2::ggplot(ggplot2::aes(y = gamma, x = N, fill = frequency)) +

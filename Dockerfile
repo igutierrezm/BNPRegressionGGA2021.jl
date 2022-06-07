@@ -1,13 +1,23 @@
 FROM rocker/r-ver:4.1.0
 
-# Install git, glpk-utils, libxt6, wget, xml2, xdg-utils, default-jre
+# Install default-jre git, glpk-utils, libxt6, wget, xml2, xdg-utils
 RUN apt-get update 
-RUN apt-get -y install default-jre git glpk-utils libxt6 wget xml2 xdg-utils
+RUN apt-get -y install \
+    default-jre default_jdk \
+    git glpk-utils libxt6 wget xml2 xdg-utils
+
+# Configure Java in R
+RUN R CMD javareconf 
+
+# Copy libjvm.so to a more appropriate location
+RUN sudo ln -s \
+    /usr/lib/jvm/java-1.11.0-openjdk-amd64/lib/server/libjvm.so \
+    /usr/local/lib/R/lib/libjvm.so
 
 # Install some useful R packages from CRAN
 RUN install2.r --error --skipinstalled --ncpus -1 \
-    dplyr ggplot2 JuliaConnectoR languageserver leaps LPKsample readr remotes \
-    R.rsp tidyr
+    dplyr ggplot2 glmulti JuliaConnectoR languageserver \
+    leaps LPKsample readr remotes R.rsp tidyr
 
 # Install some useful R packages from GitHub
 RUN R -e "remotes::install_github('nyiuab/BhGLM', force = TRUE)"

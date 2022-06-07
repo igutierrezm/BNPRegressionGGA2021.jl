@@ -15,6 +15,21 @@ begin
     import Base: rand
 end;
 
+R"""
+library(methods)
+Sys.setenv(JAVA_HOME = "/usr/lib/jvm/default-java")
+Sys.setenv(LD_LIBRARY_PATH = "/usr/local/lib/R/lib:/usr/lib/jvm/default-java/lib:/usr/lib/jvm/default-java/lib/server")
+Sys.getenv("JAVA_HOME")
+Sys.getenv("LD_LIBRARY_PATH")
+system("R CMD javareconf")
+library(rJava)
+# library(leaps)
+# library(glmulti)
+# .jinit() # this starts the JVM
+# s <- .jnew("java/lang/String", "Hello World!")
+# .jcall(s,"I","length")
+"""
+
 # Helper functions ------------------------------------------------------------
 
 function run_experiment_bnp(dy; N0, Nrep, Niter, id, filename)
@@ -29,9 +44,9 @@ end
 function run_experiment_freq(dy; N0, Nrep, Niter, id, filename)
     Random.seed!(1) # seed
     samples = [generate_sample(dy; N0, Nrep) for _ in 1:Niter] # data
-    gammas = [get_gamma_freq(samples[id]) for id in 1:Niter] # map gamma
+    gammas = [get_gamma_freq_bss(samples[id]) for id in 1:Niter] # map gamma
     reduced_gammas = reduce_gammas(gammas; method = "freq", id = id, N0 = N0)
-    CSV.write(filename, reduced_gammas) # csv file
+    # CSV.write(filename, reduced_gammas) # csv file
 end
 
 function generate_sample(dy; N0 = 50, Nrep = 10)
@@ -104,6 +119,44 @@ function get_gamma_freq(sample)
     @rget best_gamma
     return best_gamma
 end
+
+# Estimate gamma using a frequentist alternative
+function get_gamma_freq_bss(sample)
+    event0, y0, y1, X0, X1, mapping = sample
+    R"""
+    library(dplyr)
+    # data = data.frame(
+    #     y = survival::Surv($y0, $event0),
+    #     x2 = $X0[, 2], 
+    #     x3 = $X0[, 3],
+    #     x4 = $X0[, 4],
+    #     x5 = $X0[, 5],
+    #     x6 = $X0[, 6]
+    # )
+    # fitted_best_model <-
+    #     glmulti::glmulti(
+    #         formula = y ~ .,
+    #         data = data,
+    #         plotty = F,                   # No plot
+    #         report = F,                   # No interim reports
+    #         level = 1,                    # No interaction considered
+    #         method = "h",                 # Exhaustive approach
+    #         crit = "aic",                 # AIC as criteria
+    #         confsetsize = 1,              # Keep best model
+    #         fitfunction = survival::coxph # coxph function
+    #     )
+    # best_model_trues <- 
+    #     names(fitted_best_model@objects[[1]]$coefficients) %>%
+    #     gsub("x", "", .) %>%
+    #     as.integer()
+    best_gamma <- rep(0L, 6)
+    # best_gamma[best_model_trues] <- 1L
+    # best_gamma[1] <- 1L
+    """
+    @rget best_gamma
+    return best_gamma
+end
+
 
 # Reduce the MAP estimators after their estimation
 function reduce_gammas(gammas; method, id, N0)

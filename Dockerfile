@@ -4,9 +4,13 @@ FROM rocker/r-ver:4.1.0
 RUN apt-get update 
 RUN apt-get -y install default-jre git glpk-utils libxt6 wget xml2 xdg-utils
 
-# Install some useful R packages
+# Install some useful R packages from CRAN
 RUN install2.r --error --skipinstalled --ncpus -1 \
-    dplyr ggplot2 JuliaConnectoR languageserver leaps LPKsample readr tidyr
+    dplyr ggplot2 JuliaConnectoR languageserver leaps LPKsample readr remotes \
+    R.rsp tidyr
+
+# Install some useful R packages from GitHub
+RUN R -e "remotes::install_github('nyiuab/BhGLM', force = TRUE)"
 
 # Install julia 1.7.0
 WORKDIR /opt/

@@ -15,14 +15,14 @@ Base.@kwdef struct DGSBPNormalDependent <: AbstractModel
     m0_b::Vector{Float64} = zeros(D0)
     a0_τ::Float64 = 0.1
     b0_τ::Float64 = 0.1
-    ζ0g::Float64 = 1 / 3
+    ζ0g::Float64 = 1.0
     # Parameters
     b::Vector{Vector{Float64}} = [zeros(D0)]
     τ::Vector{Float64} = [1.0]
     # Transformed parameters
     XX::Vector{Matrix{Float64}} = [zeros(D0, D0)]
     Xy::Vector{Vector{Float64}} = [zeros(D0)]
-    yy::Vector{Float64} = [0.0]    
+    yy::Vector{Float64} = [0.0]
     # Skeleton
     skl::Skeleton = Skeleton(; y0, y1, X0, X1, ζ0g, mapping, update_g)
 end
@@ -88,17 +88,52 @@ function update_suffstats!(m::DGSBPNormalDependent)
 end
 
 function update_y!(m::DGSBPNormalDependent)
+    # (; b, event0, skl, ỹ0, τ) = m
+    # (; d, N0, X0vec, y0) = skl
+    # m, s = mean_and_std(ỹ0)
+    # ub = 2 * maximum(ỹ0)
+
+    # (; f, N1, rmax, s, X1, X1vec, y1, β, ϕ1) = skeleton(m)
+    # mul!(ϕ1, X1, β)
+    # @. ϕ1 = 1.0 / (1.0 + exp(ϕ1))
+
+    # for i in 1:N0
+    #     # Choose a cluster
+    #     di = 0
+    #     temp = rand()
+    #     cumsum_w = 0.0
+    #     for j in 1:rmax(skl)
+    #         cumsum_w = get_w(θ0, s0, j)
+    #     end
+    #     if !event0[i]
+    #         dist = Normal(b[d[i]] ⋅ X0vec[i], 1 / √τ[d[i]])
+    #         tdist = Truncated(dist, ỹ0[i], ub)
+    #         y0[i] = rand(tdist)
+    #     end
+    # end
     (; b, event0, skl, ỹ0, τ) = m
-    (; d, N0, X0vec, y0) = skl
-    m, s = mean_and_std(ỹ0)
-    ub = 2 * maximum(ỹ0)
+    (; N0, X0, X0vec, β, y0, ϕ0) = skl
+    ub = 2 * maximum(ỹ0)    
+    mul!(ϕ0, X0, β)
+    @. ϕ0 = 1.0 / (1.0 + exp(ϕ0))
     for i in 1:N0
         if !event0[i]
-            dist = Normal(b[d[i]] ⋅ X0vec[i], 1 / √τ[d[i]])
+            # Choose a cluster
+            di = rmax(skl)
+            tmp = rand()
+            cumsum_w = 0.0
+            for j in 1:(rmax(skl) - 1)
+                cumsum_w += get_w(ϕ0[i], 2, j)
+                if tmp <= cumsum_w
+                    di = j
+                    break
+                end
+            end
+            dist = Normal(b[di] ⋅ X0vec[i], 1 / √τ[di])
             tdist = Truncated(dist, ỹ0[i], ub)
             y0[i] = rand(tdist)
         end
-    end
+    end    
 end
 
 function update_g!(m::DGSBPNormalDependent)

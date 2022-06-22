@@ -120,7 +120,7 @@ end
 function dy(xc, xd)
     nu = 2.0
     lambda = 1.0
-    Weibull(nu, lambda * exp(1.5 + 0.5 * xc + 0.5 * xd))
+    Weibull(nu, lambda * exp(1.5 + xc + xd))
 end
 
 # Experiment 1, N0 = 50 (bnp)

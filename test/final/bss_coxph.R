@@ -1,26 +1,18 @@
-# Sys.setenv(http_proxy="http://iegutierrezm:IG17026903-9@astaro.ine.cl:8080")
-# Sys.setenv(https_proxy="http://iegutierrezm:IG17026903-9@astaro.ine.cl:8080")
-# remotes::install_github("nyiuab/BhGLM", force = TRUE, build_vignettes = TRUE)
-
-# library(BhGLM)
-# library(dplyr)
-# library(purrr)
-# library(dplyr)
-
 get_all_subsets <- function(x) {
-  out <- 
-    1:length(x) %>%
+  out <-
+    seq_len(x) |>
     purrr::map(
-      ~ utils::combn(x, .x, simplify = FALSE) %>%
-        map(~ paste0(.x, collapse = " + "))
-    ) %>%
+      ~ utils::combn(x, .x, simplify = FALSE) |>
+        purrr::map(~ paste0("x", .x)) |>
+        purrr::map(~ paste0(.x, collapse = " + "))
+    ) |>
     unlist(recursive = TRUE)
   return(out)
 }
 
 get_gamma <- function(x, k) {
   xvars <- all.vars(as.formula(x))[-1]
-  trues <- xvars %>% gsub("x", "", .) %>% as.integer()
+  trues <- gsub("x", "", xvars) |> as.integer()
   gamma <- rep(0L, k)
   gamma[trues] <- 1L
   out <- data.frame(t(gamma))
@@ -28,12 +20,13 @@ get_gamma <- function(x, k) {
   return(out)
 }
 
-# Simulate data from an exponential regression model
-simulate_exponential_data <- function(n, k) {
-  b <- c(1, rep(0, k - 1))
+# Simulate data from a weibull regression model
+simulate_weibull_data <- function(n, b, k) {
+  lambda <- 1.0
+  nu <- rep(2.0, n)
   status <- rep(TRUE, n)
-  x <- runif(n * k) %>% matrix(ncol = k)
-  y <- exp(x %*% b) %>% rexp() %>% survival::Surv(status)
+  x <- rnorm(n * k) |> matrix(ncol = k)
+  y <- rweibull(nu, lambda * exp(x %*% b)) |> survival::Surv(status)
   out <- data.frame(
     y = y, 
     x1 = x[, 1],
@@ -50,46 +43,47 @@ bss_coxph <- function(formula, data) {
   varlist <- all.vars(terms(formula, data = data))
   xvars <- varlist[-1]
   yvar <- varlist[1]
-  submodels <- 
-    paste(yvar, get_all_subsets(xvars), sep = " ~ ")
+  submodels <- paste(yvar, get_all_subsets(length(xvars)), sep = " ~ ")
   # Compute the aic for each submodel
-  aics <- 
-    submodels %>%
+  aics <-
+    submodels |>
     purrr::map_dbl(
       function(.x) {
         fit <- survival::coxph(as.formula(.x), data)
         out <- 2 * (length(fit$assign) - fit$loglik[2])
         return(out)
       }
-  )
+    )
   # Select the best model
   best_submodel <- submodels[which.min(aics)]
-  
+
   # Compute gamma
   out <- get_gamma(best_submodel, length(xvars))
   return(out)
 }
 
-# Complete Example -------------------------------------------------------------
-
+# Complete Example
 set.seed(1)
-out <- 
-  1:100 %>%
+out <-
+  1:100 |>
   purrr::map_df(
     function(x) {
-      data <- simulate_exponential_data(100, 5)
+      n <- 1000
+      k <- 5
+      b <- c(1, rep(0, k - 1))
+      data <- simulate_weibull_data(n, b, k)
       gamma <- bss_coxph(y ~ ., data)
       return(gamma)
     }
   )
 
-#################################################################################
-#################################################################################
-#################################################################################
-#################################################################################
-#################################################################################
-#################################################################################
-#################################################################################
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+################################################################################
 
 
 
@@ -141,8 +135,8 @@ fitted_best_model <-
     fitfunction = survival::coxph # coxph function
   )
 best_model_trues <- 
-  names(fitted_best_model@objects[[1]]$coefficients) %>%
-  gsub("x", "", .) %>%
+  names(fitted_best_model@objects[[1]]$coefficients) |>
+  gsub("x", "", .) |>
   as.integer()
 best_model_trues
 

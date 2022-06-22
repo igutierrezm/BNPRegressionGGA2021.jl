@@ -15,21 +15,6 @@ begin
     import Base: rand
 end;
 
-R"""
-library(methods)
-Sys.setenv(JAVA_HOME = "/usr/lib/jvm/default-java")
-Sys.setenv(LD_LIBRARY_PATH = "/usr/local/lib/R/lib:/usr/lib/jvm/default-java/lib:/usr/lib/jvm/default-java/lib/server")
-Sys.getenv("JAVA_HOME")
-Sys.getenv("LD_LIBRARY_PATH")
-system("R CMD javareconf")
-library(rJava)
-# library(leaps)
-# library(glmulti)
-# .jinit() # this starts the JVM
-# s <- .jnew("java/lang/String", "Hello World!")
-# .jcall(s,"I","length")
-"""
-
 # Helper functions ------------------------------------------------------------
 
 function run_experiment_bnp(dy; N0, Nrep, Niter, id, filename)
@@ -44,9 +29,9 @@ end
 function run_experiment_freq(dy; N0, Nrep, Niter, id, filename)
     Random.seed!(1) # seed
     samples = [generate_sample(dy; N0, Nrep) for _ in 1:Niter] # data
-    gammas = [get_gamma_freq_bss(samples[id]) for id in 1:Niter] # map gamma
+    gammas = [get_gamma_freq(samples[id]) for id in 1:Niter] # map gamma
     reduced_gammas = reduce_gammas(gammas; method = "freq", id = id, N0 = N0)
-    # CSV.write(filename, reduced_gammas) # csv file
+    CSV.write(filename, reduced_gammas) # csv file
 end
 
 function generate_sample(dy; N0 = 50, Nrep = 10)
@@ -71,15 +56,18 @@ function generate_sample(dy; N0 = 50, Nrep = 10)
     # Set the mapping 
     mapping = [[1], [2], [3], [4], [5], [6]]
 
+    # Set the gammas to be updated
+    update_g = Bool.([0; ones(5)])
+
     # Return the preprocessed results
-    return event0, y0, y1, X0, X1, mapping
+    return event0, y0, y1, X0, X1, mapping, update_g
 end;
 
 # Get the MAP estimator of gamma using BNP
 function get_gamma_bnp(sample, id)
     println(id)
-    event0, y0, y1, X0, X1, mapping = sample
-    smpl = BNP.DGSBPNormalDependent(; y0, event0, X0, y1, X1, mapping)
+    event0, y0, y1, X0, X1, mapping, update_g = sample
+    smpl = BNP.DGSBPNormalDependent(; y0, event0, X0, y1, X1, mapping, update_g)
     _, _, chaing = BNP.sample!(smpl; mcmcsize = 10000)
     gamma = begin
         chaing |>
@@ -89,7 +77,7 @@ function get_gamma_bnp(sample, id)
         x -> getindex(x, 1) |>
         x -> getindex(x, 1)
     end
-    return gamma
+    return gamma[2:length(gamma)]
 end
 
 # Estimate gamma using a frequentist alternative
@@ -98,69 +86,29 @@ function get_gamma_freq(sample)
     R"""
     library(dplyr)
     data = data.frame(
-        status = $event0,
-        y = $y0,
-        x2 = $X0[, 2], 
-        x3 = $X0[, 3],
-        x4 = $X0[, 4],
-        x5 = $X0[, 5],
-        x6 = $X0[, 6]
+        y = survival::Surv($y0, $event0),
+        x1 = $X0[, 2], 
+        x2 = $X0[, 3],
+        x3 = $X0[, 4],
+        x4 = $X0[, 5],
+        x5 = $X0[, 6]
     )
-    fitted_model <- survival::coxph(survival::Surv(y, status) ~ ., data = data)
+    fitted_model <- survival::coxph(y ~ ., data = data)
     fitted_bestmodel <- MASS::stepAIC(fitted_model)
     best_model_trues <- 
         names(fitted_bestmodel$coefficients) %>%
         gsub("x", "", .) %>%
         as.numeric()
-    best_gamma <- rep(0L, 6)
+    best_gamma <- rep(0L, 5)
     best_gamma[best_model_trues] <- 1L
-    best_gamma[1] <- 1L
     """
     @rget best_gamma
     return best_gamma
 end
-
-# Estimate gamma using a frequentist alternative
-function get_gamma_freq_bss(sample)
-    event0, y0, y1, X0, X1, mapping = sample
-    R"""
-    library(dplyr)
-    # data = data.frame(
-    #     y = survival::Surv($y0, $event0),
-    #     x2 = $X0[, 2], 
-    #     x3 = $X0[, 3],
-    #     x4 = $X0[, 4],
-    #     x5 = $X0[, 5],
-    #     x6 = $X0[, 6]
-    # )
-    # fitted_best_model <-
-    #     glmulti::glmulti(
-    #         formula = y ~ .,
-    #         data = data,
-    #         plotty = F,                   # No plot
-    #         report = F,                   # No interim reports
-    #         level = 1,                    # No interaction considered
-    #         method = "h",                 # Exhaustive approach
-    #         crit = "aic",                 # AIC as criteria
-    #         confsetsize = 1,              # Keep best model
-    #         fitfunction = survival::coxph # coxph function
-    #     )
-    # best_model_trues <- 
-    #     names(fitted_best_model@objects[[1]]$coefficients) %>%
-    #     gsub("x", "", .) %>%
-    #     as.integer()
-    best_gamma <- rep(0L, 6)
-    # best_gamma[best_model_trues] <- 1L
-    # best_gamma[1] <- 1L
-    """
-    @rget best_gamma
-    return best_gamma
-end
-
 
 # Reduce the MAP estimators after their estimation
 function reduce_gammas(gammas; method, id, N0)
-    names = "g" .* string.(1:6)
+    names = "g" .* string.(1:5)
     mat = reduce(vcat, gammas')
     df = DataFrame(mat, names)
     df[!, :method] .= method
@@ -170,7 +118,9 @@ function reduce_gammas(gammas; method, id, N0)
 end
 
 function dy(xc, xd)
-    Weibull(2, 1.5 + xc + xd)
+    nu = 2.0
+    lambda = 1.0
+    Weibull(nu, lambda * exp(1.5 + 0.5 * xc + 0.5 * xd))
 end
 
 # Experiment 1, N0 = 50 (bnp)
@@ -221,18 +171,6 @@ begin
     run_experiment_freq(dy; N0 = 500, Nrep = 5, Niter = 100, id = 1, filename)
 end 
 
-# Experiment 1, N0 = 1000 (bnp)
-begin 
-    filename = "data/final/survival-gamma-ph-bnp-1000.csv"
-    run_experiment_bnp(dy; N0 = 1000, Nrep = 5, Niter = 100, id = 1, filename)
-end 
-
-# Experiment 1, N0 = 1000 (freq)
-begin 
-    filename = "data/final/survival-gamma-ph-freq-1000.csv"
-    run_experiment_freq(dy; N0 = 1000, Nrep = 5, Niter = 100, id = 1, filename)
-end 
-
 # Summary of the results
 R"""
 data <- 
@@ -243,10 +181,10 @@ data <-
     ) |>
     purrr::map(readr::read_csv, show_col_types = FALSE) |>
     dplyr::bind_rows() |>
-    dplyr::group_by(method, id, N0, g1, g2, g3, g4, g5, g6) |>
+    dplyr::group_by(method, id, N0, g1, g2, g3, g4, g5) |>
     dplyr::count(name = "frequency") |>
     dplyr::ungroup() |>
-    dplyr::mutate(gamma = paste0(g1, g2, g3, g4, g5, g6)) |>
+    dplyr::mutate(gamma = paste0(g1, g2, g3, g4, g5)) |>
     dplyr::select(gamma, frequency, id, method, N = N0)
 p <- 
     data |>
